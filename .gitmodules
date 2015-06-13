@@ -1,0 +1,10 @@
+[submodule "app/Plugin/DebugKit"]
+	path = app/Plugin/DebugKit
+	url = git://github.com/cakephp/debug_kit.git
+	branch = 2.2
+[submodule "app/Plugin/Mongodb"]
+	path = app/Plugin/Mongodb
+	url = git@github.com:ichikaway/cakephp-mongodb.git
+[submodule "app/Plugin/upload_pack"]
+	path = app/Plugin/upload_pack
+	url = git@github.com:szajbus/uploadpack.git
