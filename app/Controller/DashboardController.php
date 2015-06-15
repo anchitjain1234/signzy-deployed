@@ -2,6 +2,8 @@
 class DashboardController extends AppController
 {
 
+
+
   public function beforeFilter()
 	{
 		/*
@@ -17,6 +19,8 @@ class DashboardController extends AppController
     $userdata=$this->User->find('first',$params);
     $this->set('name',$userdata['User']['name']);
 	}
+
+
 
   public function index()
   {
@@ -37,11 +41,17 @@ class DashboardController extends AppController
       /*
       Give link to user here for resending verification email.
       */
-      $this->Session->setFlash(__('Your email hasnt been verified.Please verify it first to continue.'),'flash_error');
+      $this->Session->setFlash(__('Your email hasn\'t been verified.Please
+                                   verify it first to continue.'),'flash_error');
       //return $this->redirect(array('controller'=>'users','action' => 'index'));
     }
   }
 
+
+
+  /*
+  These are dummy functions . Will remove them
+  */
   public function upload()
   {
   	$this->layout = 'insidelayout';
