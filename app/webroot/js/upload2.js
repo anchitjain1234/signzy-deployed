@@ -3,7 +3,7 @@
   var email_entered;
   var emails =[];
 $('#email_search').autocomplete({
-      source: "http://localhost/cakephp/col/index.json",
+      source: "../col/index.json",
       open: function() {
        $(this).autocomplete("widget")
               .appendTo("#results")
