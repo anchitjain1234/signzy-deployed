@@ -49,11 +49,16 @@ class EmailConfig {
 	public $mandrill_signup = array(
 		'transport' => 'Smtp',
 		'from' => array('noreply@verysure.com' => 'Verysure Bot'),
-		'host' => 'smtp.mandrillapp.com',
+		'host' => 'smtp.sendgrid.net',
+		//'host' => 'smtp.mandrillapp.com',
 		'port' => 587,
 		'timeout' => 30,
-		'username' => 'eckovation@yandex.com',
+		/*
+		username' => 'eckovation@yandex.com',
 		'password' => '7-kRluJ9lCM4uf_aPTRHOQ',
+*/
+		'username' => 'wgMgsFECGV',
+		'password' => 'PRKn5XB56kup9708',
 		'log' => true,
 		'replyTo' => 'signupreply@verysure.com',
 		'returnPath' => 'signupreturn@verysure.com',

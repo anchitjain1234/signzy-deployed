@@ -36,7 +36,6 @@ class DashboardController extends AppController
 
     if($userdata['User']['verified'] === 0)
     {
-      echo "adasdasasd";
       //$this->Auth->logout();
       /*
       Give link to user here for resending verification email.
@@ -45,6 +44,23 @@ class DashboardController extends AppController
                                    verify it first to continue.'),'flash_error');
       //return $this->redirect(array('controller'=>'users','action' => 'index'));
     }
+    $this->loadModel('Document');
+    $params = array(
+      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => "0"),
+    );
+    $this->set('pendingcount',$this->Document->find('count',$params));
+    $params = array(
+      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => "1"),
+    );
+    $this->set('completedcount',$this->Document->find('count',$params));
+    $params = array(
+      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => "2"),
+    );
+    $this->set('voidcount',$this->Document->find('count',$params));
+    $params = array(
+      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => "3"),
+    );
+    $this->set('disputedcount',$this->Document->find('count',$params));
   }
 
 
