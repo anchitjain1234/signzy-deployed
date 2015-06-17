@@ -29,8 +29,8 @@ class ColController extends AppController
     if ($this->request->is('ajax')) {
         $term = $this->request->query('term');
         $userNames = $this->User->find('list', array(
-          'conditions' => array('username' => $term),
-          'fields' => array('name')
+          'conditions' => array('username' => new MongoRegex("/".$term."/i")),
+          'fields' => array('username')
         ));
 
         $this->set(compact('userNames'));
@@ -54,6 +54,11 @@ class ColController extends AppController
   }
 
   public function index2()
+  {
+
+  }
+
+  public function test()
   {
 
   }

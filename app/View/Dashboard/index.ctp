@@ -31,24 +31,24 @@
 
 
   <div class="row">
-
-    <?php echo $this->Html->link('<div class="col-md-3 text-center hover-highlight">
-        <h2><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> 0</h2>
+    <a href="#"><div class="col-md-3 text-center hover-highlight">
+        <h2><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span><?php echo $voidcount; ?></h2>
         <h4>Action Required</h4>
-      </div>','#',array('escape'=>FALSE))?>
+      </div></a>
 
-    <?php echo $this->Html->link('<div class="col-md-3 text-center hover-highlight">
-        <h2><span class="glyphicon glyphicon-time" aria-hidden="true"></span> 0</h2>
+    <a href="#"><div class="col-md-3 text-center hover-highlight">
+        <h2><span class="glyphicon glyphicon-time" aria-hidden="true"></span> <?php echo $pendingcount; ?></h2>
         <h4>Waiting for others</h4>
-      </div>','#',array('escape'=>FALSE))?>
-    <?php echo $this->Html->link('<div class="col-md-3 text-center hover-highlight">
-        <h2><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 0</h2>
-        <h4>Canceled (Last 1 year)</h4>
-      </div>','#',array('escape'=>FALSE))?>
-    <?php echo $this->Html->link('<div class="col-md-3 text-center hover-highlight">
-        <h2><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 0</h2>
-        <h4>Completed (Last 1 year)</h4>
-      </div>','#',array('escape'=>FALSE))?>
+      </div></a>
+
+      <a href="#"><div class="col-md-3 text-center hover-highlight">
+          <h2><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> <?php echo $disputedcount; ?></h2>
+          <h4>Waiting for others</h4>
+        </div></a>
+        <a href="#"><div class="col-md-3 text-center hover-highlight">
+            <h2><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <?php echo $completedcount; ?></h2>
+            <h4>Waiting for others</h4>
+          </div></a>
   </div>
 </div>
 

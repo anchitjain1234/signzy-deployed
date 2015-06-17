@@ -31,7 +31,7 @@ class Col extends AppModel
     'dstatus' => array (
       'type' => 'string',
       'null' => 'false' ,
-      'default' => null
+      'default' => '0'
       )
     );
 }

@@ -5,19 +5,15 @@
     <div class="col-md-6" style="height:500px;overflow-y:scroll;" id="upload_preview">
         <!-- <img src="img/sample_nda.png" /> -->
         <?php
-          if(isset($document))
-          {
-
-            $link=$this->Upload->uploadUrl($document, 'Document.avatar' , array('urlize' =>'true'));
-            echo "<embed src='".$link."' width = '540' height = '490'></embed>";
-          }
-          else
-          {
-            echo "<div class=\"container\" >
-                    <div class=\"row align-center\">
+          if (isset($document)) {
+              $link = $this->Upload->uploadUrl($document, 'Document.avatar', array('urlize' => 'true'));
+              echo "<embed src='".$link."' width = '540' height = '490'></embed>";
+          } else {
+              echo '<div class="container" >
+                    <div class="row align-center">
                       Your uploaded document will appear here.
                     </div>
-                  </div>";
+                  </div>';
           }
         ?>
 
@@ -35,12 +31,14 @@
           <label for="DocumentAvatar" class="control-label">Document:</label>
           <input class="form-control" type="file" name="data[Document][avatar]" id="DocumentAvatar" required="required">
         </div>
+        <input id="emails_hidden" name="emails_hidden" type="hidden" />
+        <b>Signatories</b>:
+        <ul class="list-group" id="signatory_holder"></ul>
         <div class="submit form-group has-feedback">
-          <input type="submit" value="Upload" class="btn btn-primary">
+          <button id="<?php echo $useremail ?>" type="button" class="btn btn-primary signatory_button" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-plus"></span>Add Signatory</button>
         </div>
+        <input type="submit" value="Upload" class="btn btn-success btn-block" id="submitform">
       </form>
-      <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">Add Signatory</button>
-      <ul class="list-group" id="signatory_holder"></ul>
     </div>
 
   <!-- Modal -->
@@ -55,8 +53,8 @@
 
             <div class="form-group">
               <?php
-              echo $this->Form->label('usernsme', 'Email:', array('class'=>'control-label')); ?>
-                <?php echo $this->Form->input("username",array('class' => 'form-control','placeholder' => 'Email address' , 'id' => 'email_search','label' => false , 'autocomplete'=>"off" )); ?>
+              echo $this->Form->label('usernsme', 'Email:', array('class' => 'control-label')); ?>
+                <?php echo $this->Form->input('username', array('class' => 'form-control', 'placeholder' => 'Email address', 'id' => 'email_search', 'label' => false, 'autocomplete' => 'off')); ?>
                 <div id="results"></div>
                 <div id="empty-message"></div>
             </div>
