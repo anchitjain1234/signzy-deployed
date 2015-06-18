@@ -348,7 +348,7 @@ class DocumentsController extends AppController
                               ->viewVars(array('dashboard_link' =>
                                               Router::url( array('controller' => 'dashboard',
                                                                  'action' => 'index' ), true ),
-                                               'name_of_user' => $owner_email['User']['name']));
+                                               'name_of_user' => $owner_data['User']['name']));
         $document_change_email->send();
 
         return $this->Session->setFlash(__('Your status updated successfully.

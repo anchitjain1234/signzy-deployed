@@ -3,19 +3,19 @@
       {
         if($status === "0")
         {
-          return "Pending";
+          return "<span class=\"label label-warning\">Pending</span>";
         }
         elseif ($status === "1")
         {
-          return "Completed";
+          return "<span class=\"label label-success\">Completed</span>";
         }
         elseif ($status === "2")
         {
-          return "Void";
+          return "<span class=\"label label-default\">Void</span>";
         }
         else
         {
-          return "Canceled";
+          return "<span class=\"label label-danger\">Disputed</span>";
         }
       }
       ?>
