@@ -20,7 +20,7 @@
     </div>
     <div class="col-md-6">
           <!-- <img src="img/sample_nda.png" /> -->
-      <form action="/documents/upload2" id="DocumentUpload2Form" enctype="multipart/form-data" method="post" accept-charset="utf-8">
+      <form id="DocumentUpload2Form" enctype="multipart/form-data" method="post" accept-charset="utf-8">
         <div style="display:none;"><input type="hidden" name="_method" value="POST">
         </div>
         <div class="input text form-group has-feedback">

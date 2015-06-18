@@ -1,21 +1,60 @@
-<?php $i=0;?>
-<table class="table">
-  <caption>Your Documents</caption>
-  <thead>
-    <tr>
-      <th> S.No. </th>
-      <th> Document </th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <?php foreach ($user_documents_data as $user_document): ?>
-      <td><?php $i+=1; echo h($i); ?></td>
+<?php $this->assign('title', 'VerySure™ : Your Documents!'); ?>
+<?php function change_status_number_to_status($status)
+      {
+        if($status === "0")
+        {
+          return "Pending";
+        }
+        elseif ($status === "1")
+        {
+          return "Completed";
+        }
+        elseif ($status === "2")
+        {
+          return "Void";
+        }
+        else
+        {
+          return "Canceled";
+        }
+      }
+      ?>
+<div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h1>Documents</h1>
+        </div>
+      </div>
 
-      <td><a href="<?php echo Router::url('/', true).$this->Upload->uploadUrl($user_document,
-                                                                          'Document.avatar' , array('urlize' =>false )) ?>">
-      <?php echo $user_document['Document']['name']; ?></a></td>
-    </tr>
-  </tbody>
-<?php endforeach; ?>
-</table>
+      <div class="row">
+        <div class="col-md-12">
+          <button type="submit" class="btn btn-default">Remind</button>
+          <button type="submit" class="btn btn-default">Archive</button>
+        </div>
+      </div>
+
+      <br/>
+      <div class="row">
+        <div class="col-md-12">
+          <ul class="list-group">
+            <?php foreach ($user_documents_data as $user_document): ?>
+              <?php echo "<li class=\"list-group-item\">";
+                    echo "<div class=\"row\">";
+                    echo "<div class=\"col-md-8\"><input type=\"checkbox\" class=\"pull-left\" />&nbsp;";
+                    $url = Router::url('/', true).$this->Upload->uploadUrl($user_document,'Document.avatar' , array('urlize' =>false ));
+
+                    echo '<a class="pull-left" href="'.$url.'">';
+                    echo $user_document['Document']['name'];
+                    echo "</a></div>";
+                    echo "<div class=\"col-md-2 \">";
+                    echo date('Y-M-d h:i:s', $user_document['Document']['created']->sec);
+                    echo "</div>";
+                    echo "<div class=\"col-md-2 pull-right\">";
+                    $status=change_status_number_to_status($user_document['Document']['status']);
+                    echo $status;
+                    echo "</div>";
+                    echo "</li>";
+                  endforeach;?>
+          </ul>
+        </div>
+      </div>
