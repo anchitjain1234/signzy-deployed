@@ -97,68 +97,76 @@ class DocumentsController extends AppController
             */
             $this->loadModel('Col');
             $emails  = json_decode($this->request->data['emails_hidden']);
-            $document_name  = $this->request->data['Document']['name'];
-
-            /*
-            Get document id where ownerid = current user id and name = current uploaded document name
-            */
-            $params = array(
-              'fields' => array('id'),
-              'conditions' => array('name' => $document_name,'ownerid' => CakeSession::read("Auth.User.id")),
-            );
-            $docudata=$this->Document->find('first',$params);
-
-            /*
-            For each entered email address we will first check whether its a valid email address or not.
-            If we find even if one email is invalid it means that user is manipulating our javascript so
-            we will not save the collabarators data for this request.
-            */
-            foreach($emails as $email):
-              if(!Validation::email($email))
-              {
-                throw new NotFoundException(__('Error while saving data.'));
-              }
-            endforeach;
-
-            foreach($emails as $email):
-              $this->Col->create();
-              $this->Col->set('did',$docudata['Document']['id']);
+            if(count($emails) > 0)
+            {
+              $document_name  = $this->request->data['Document']['name'];
 
               /*
-              Change status here to default status
+              Get document id where ownerid = current user id and name = current uploaded document name
               */
-              $this->Col->set('status',"0");
               $params = array(
-                'fields' => array('id','name'),
-                'conditions' => array('username' => $email),
+                'fields' => array('id'),
+                'conditions' => array('name' => $document_name,'ownerid' => CakeSession::read("Auth.User.id")),
               );
-              $userdata=$this->User->find('first',$params);
-              $token=str_shuffle(hash("sha512",(hash("sha256",$email
-                                      .$userdata['User']['name'])).strval(time()).md5(rand())));
-              $this->Col->set('token',$token);
-              $this->Col->set('uid',$userdata['User']['id']);
-              $this->Col->save();
+              $docudata=$this->Document->find('first',$params);
 
               /*
-              Send email to the saved collabarator
+              For each entered email address we will first check whether its a valid email address or not.
+              If we find even if one email is invalid it means that user is manipulating our javascript so
+              we will not save the collabarators data for this request.
               */
-              $sign_document_email=new CakeEmail('mandrill_signup');
-  						$sign_document_email->to($email);
-  						$sign_document_email->subject('Document Signing Request');
-              $sign_document_email->template('sign_document_request','notification_email_layout')
-                                  ->viewVars(array('document_signing_link' =>
-   																								 Router::url( array('controller' => 'documents',
-   																																		'action' => 'sign' ,
-   																																		"?" => [
-   																																			"userid" => $userdata['User']['id']
-   																																			,"token" => $token
-                                                                        ,"docuid" => $docudata['Document']['id']])
-   																																			, true ),
-   																									'name_of_user' => $userdata['User']['name']));
-              $sign_document_email->send();
+              foreach($emails as $email):
+                if(!Validation::email($email))
+                {
+                  throw new NotFoundException(__('Error while saving data.'));
+                }
+              endforeach;
 
-            endforeach;
-            $this->Session->setFlash(__('Document uploaded and emails sent to all the signatories successfully.'),'flash_success');
+              foreach($emails as $email):
+                $this->Col->create();
+                $this->Col->set('did',$docudata['Document']['id']);
+
+                /*
+                Change status here to default status
+                */
+                $this->Col->set('status',"0");
+                $params = array(
+                  'fields' => array('id','name'),
+                  'conditions' => array('username' => $email),
+                );
+                $userdata=$this->User->find('first',$params);
+                $token=str_shuffle(hash("sha512",(hash("sha256",$email
+                                        .$userdata['User']['name'])).strval(time()).md5(rand())));
+                $this->Col->set('token',$token);
+                $this->Col->set('uid',$userdata['User']['id']);
+                $this->Col->save();
+
+                /*
+                Send email to the saved collabarator
+                */
+                $sign_document_email=new CakeEmail('mandrill_signup');
+    						$sign_document_email->to($email);
+    						$sign_document_email->subject('Document Signing Request');
+                $sign_document_email->template('sign_document_request','notification_email_layout')
+                                    ->viewVars(array('document_signing_link' =>
+     																								 Router::url( array('controller' => 'documents',
+     																																		'action' => 'sign' ,
+     																																		"?" => [
+     																																			"userid" => $userdata['User']['id']
+     																																			,"token" => $token
+                                                                          ,"docuid" => $docudata['Document']['id']])
+     																																			, true ),
+     																									'name_of_user' => $userdata['User']['name']));
+                $sign_document_email->send();
+
+              endforeach;
+              $this->Session->setFlash(__('Document uploaded and emails sent to all the signatories successfully.'),'flash_success');
+            }
+            else
+            {
+              $this->Session->setFlash(__('Document uploaded successfully.'),'flash_success');
+            }
+
             $this->set('document', $this->Document->findById($this->Document->id));
     			}
           else
