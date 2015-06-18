@@ -148,6 +148,14 @@ class UsersController extends AppController
         }
 
         /*
+        Logging out any user currently loggedin so that no wrong data gets saved in our database.
+        */
+        if(AuthComponent::user('id'))
+        {
+          $this->Auth->logout();
+        }
+
+        /*
         Finding user if token and uesrname are present
         */
         $parameters = array(
@@ -292,6 +300,14 @@ class UsersController extends AppController
             $username = $this->params['url']['username'];
         } else {
             throw new NotFoundException(__('Invalid URL'));
+        }
+
+        /*
+        Logging out any user currently loggedin so that no wrong data gets saved in our database.
+        */
+        if(AuthComponent::user('id'))
+        {
+          $this->Auth->logout();
         }
 
         if ($forgot === '1') {
