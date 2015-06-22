@@ -28,9 +28,9 @@ $(function () {
   });
 
   $("#sign").click(function(e){
-    if($("#biometric_type").val() == "voicescan") {
+    if($("#biometric_type").val() === "voicescan") {
       $('#modal_voicescan').modal();
-    } else if($("#biometric_type").val() == "facescan") {
+    } else if($("#biometric_type").val() === "facescan") {
       $('#modal_facescan').modal();
     }
     return false;
@@ -55,7 +55,7 @@ $(function () {
 			data : {"status":1,"userid":userid,"docuid":docuid}
 		});
     window.location = "../dashboard";
-	}
+	};
 
   $.reject_document = function(){
     $.ajax({
@@ -64,7 +64,7 @@ $(function () {
 			data : {"status":3,"userid":userid,"docuid":docuid}
 		});
     window.location = "../dashboard";
-  }
+  };
 
 	$.void_document = function(){
     $.ajax({
@@ -73,7 +73,7 @@ $(function () {
 			data : {"status":2,"userid":userid,"docuid":docuid}
 		});
     window.location = "../dashboard";
-  }
+  };
 
   $('#sure_success').click($.sign_document);
   $('#decline_sign').click($.reject_document);
