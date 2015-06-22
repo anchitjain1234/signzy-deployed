@@ -43,7 +43,7 @@ jQuery(document).ready(function() {
 		popoverError: function(errors) {
 			var message = "<div><ul class='error-list' style='margin-bottom: 0;'>";
 			jQuery.each(errors, function(idx, err) {
-				if (err != '<span style="color: #d52929">undefined</span>') {
+				if (err !== '<span style="color: #d52929">undefined</span>') {
 					message += "<li>" + err + "</li>";
 				}
 
@@ -61,7 +61,7 @@ jQuery(document).ready(function() {
 			wordTwoCharacterClasses: true,
 			wordRepetitions: true,
 			wordOneSpecialChar: true,
-			wordLetterNumberCombo: true,
+			wordLetterNumberCombo: true
 
 		}
 	};
@@ -88,7 +88,7 @@ jQuery(document).ready(function() {
 			$('#renter_password').tooltip("destroy");
 		};
 
-	}
+	};
 
 	$.pwd_check = function() {
 
@@ -108,7 +108,7 @@ jQuery(document).ready(function() {
 				$("#pwd_glyph").attr('class', 'glyphicon glyphicon-ok form-control-feedback');
 				$('#password').tooltip("destroy");
 			};
-		}
+		};
 		// Copied from stackoverflow.
 	$.email_check = function() {
 		var email_entered = $("#useremail").val();
@@ -127,7 +127,7 @@ jQuery(document).ready(function() {
 			$("#email_glyph").attr('class', 'glyphicon glyphicon-ok form-control-feedback');
 			$('#useremail').tooltip("destroy");
 		};
-	}
+	};
 
 	$.name_check = function() {
 		var name_entered = $("#userusername").val();
@@ -140,7 +140,7 @@ jQuery(document).ready(function() {
 			$("#name-glyph").attr('class', 'glyphicon glyphicon-ok form-control-feedback');
 			//$('#userusername').tooltip("destroy");
 		}
-	}
+	};
 
 	$.disable_submit = function() {
 		if (pwdreentererror === 1 || pwderror === 1 || emailerror === 1 || nameerror === 1) {
@@ -148,7 +148,7 @@ jQuery(document).ready(function() {
 		} else {
 			$("#submitbutton").removeAttr('disabled');
 		};
-	}
+	};
 
 
 
@@ -183,5 +183,5 @@ jQuery(document).ready(function() {
 });
 
 $(function() {
-	$('[data-toggle="popover"]').popover()
+	$('[data-toggle="popover"]').popover();
 });
