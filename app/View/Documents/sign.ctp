@@ -11,7 +11,8 @@
     <div class="col-md-1"><?php echo $this->Html->image('profile_new.png' , array('alt' => 'Document')); ?></div>
     <div class="col-md-3"><h5><?php echo $name ?></h5><h5>Your Affiliated Company</h5><h6></h6></div>
     <div class="col-md-8 text-right">
-      <a href="#">Download</a> | <a href="trail.html">Trail</a>
+      <?php $link=$this->Upload->uploadUrl($document, 'Document.avatar' , array('urlize' =>'true'));?>
+      <a href="<?php echo $link; ?>">Download</a> | <?php echo $this->Html->link('Trail', array('controller'=>'documents','action'=>'trail',$document['Document']['id'])); ?>
     </div>
   </div>
 
@@ -21,7 +22,6 @@
         if(isset($document))
         {
 
-          $link=$this->Upload->uploadUrl($document, 'Document.avatar' , array('urlize' =>'true'));
           echo "<embed src='".$link."' width = '1100' height = '380'></embed>";
         }
         else

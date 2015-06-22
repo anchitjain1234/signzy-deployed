@@ -29,7 +29,7 @@ jQuery(document).ready(function() {
 			$("#pwd_glyph").attr('class', 'glyphicon glyphicon-remove form-control-feedback');
 			$("#signinbutton").attr('disabled', 'disabled');
 		};
-	}
+	};
 
 	$.email_check = function() {
 		if ($('#signinemail').valid()) {
@@ -38,7 +38,7 @@ jQuery(document).ready(function() {
 			$("#email_glyph").attr('class', 'glyphicon glyphicon-remove form-control-feedback');
 			$("#signinbutton").attr('disabled', 'disabled');
 		};
-	}
+	};
 
 	$.signinbutton_check = function() {
 		if ($('#signinpassword').valid() && $('#signinemail').valid()) {
@@ -46,7 +46,7 @@ jQuery(document).ready(function() {
 		} else {
 			$("#signinbutton").attr('disabled', 'disabled');
 		}
-	}
+	};
 
 	$("#signinemail").on('keyup focus hover', $.email_check);
 	$("#signinemail").on('keyup focus hover', $.signinbutton_check);

@@ -20,7 +20,7 @@
           <div class="form-group has-feedback ">
            <label for="password_repeat" class="control-label">Confirm Password:</label>
               <input type="password" class="form-control" id="renter_password" placeholder="Enter password again" id="renter_password" name="renter_password" required="required">
-              <div class="error-message"> <?php if(isset($pwdmatcherror)) echo "Password does not matches."; ?></div>
+              <div class="error-message"> <?php if(isset($pwdmatcherror)) {echo "Password does not matches.";} ?></div>
            <i id="pwd_repeat_glyph" class="glyphicon glyphicon-remove form-control-feedback"></i>
          </div>
         <?php
