@@ -48,7 +48,7 @@ class UsersController extends AppController {
             $this->User->create();
 
             /* verified status will be false by default. 0 = false 1 = true */
-            $this->request->data['User']['verified'] = 0;
+            $this->request->data['User']['verified'] = Configure::read('user_not_verified');
             $this->User->set($this->request->data);
 
             if ($this->User->validates()) {
@@ -66,19 +66,11 @@ class UsersController extends AppController {
                         /*
                           Send verification email
                          */
-                        $verification_email = new CakeEmail('mandrill_signup');
-                        $verification_email->to($this->request->data['User']['username']);
-                        $verification_email->subject('Verification email');
-                        /*
-                          viewvars will send email_verification_link to the email view present in View/Emails/html directory
-                         */
-                        $verification_email->template('signupemail', 'notification_email_layout')
-                                ->viewVars(array('email_verification_link' => Router::url(array('controller' => 'users',
-                                        'action' => 'verify',
-                                        '?' => [
-                                            'username' => $this->request->data['User']['username'], 'token' => $this->request->data['User']['token'],],), true),
-                                    'name_of_user' => $this->request->data['User']['name'],));
-                        $verification_email->send();
+                        $email_verification_link = Router::url(array('controller' => 'users',
+                        'action' => 'verify',
+                        '?' => [
+                        'username' => $this->request->data['User']['username'], 'token' => $this->request->data['User']['token'],], ), true);
+                        $this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
                         /*
                           Enter code here for case when email sending is failed.
                          */
@@ -156,8 +148,7 @@ class UsersController extends AppController {
             'conditions' => array(
                 'username' => $username,
                 'token' => $token,
-            ),
-            'fields' => array('id', 'verified'),
+            )
         );
         $userid = $this->User->find('all', $parameters);
 
@@ -165,7 +156,7 @@ class UsersController extends AppController {
             /*
               Checking for the case when user is already verified
              */
-            if ($userid['0']['User']['verified'] === 1) {
+            if ($userid['0']['User']['verified'] === Configure::read('user_verified')) {
                 $this->Session->setFlash(__('You have been already verified.'), 'flash_warning');
 
                 return $this->redirect(array('action' => 'index'));
@@ -180,7 +171,7 @@ class UsersController extends AppController {
             if (!$this->User->exists()) {
                 throw new NotFoundException(__('Invalid URL'));
             }
-            $this->request->data['User']['verified'] = 1;
+            $this->request->data['User']['verified'] = Configure::read('user_verified');;
             /*
               Changing token so that link sent to user is no longer valid
              */
@@ -190,14 +181,9 @@ class UsersController extends AppController {
                 /*
                   Sending welcome email to the user after user signs up.
                  */
-                $welcome_email = new CakeEmail('mandrill_signup');
-                $welcome_email->to($username);
-                $welcome_email->subject('Welcome to VerySure');
-                $welcome_email->template('signup-welcome', 'welcome_email_layout');
-                $welcome_email->send();
+                $this->sendemail('signup-welcome', 'notification_email_layout',$userid, '', 'Welcome to VerySure');
+                $this->Session->setFlash(__('Congrats you have been verified.Now you can sigin to access our great site.'), 'flash_success');
 
-                $this->Session->setFlash(__('Congrats you have been verified.
-																		Now you can sigin to access our great site.'), 'flash_success');
 
                 return $this->redirect(array('action' => 'index'));
             } else {

@@ -1,37 +1,36 @@
 <?php
 
-class Col extends AppModel
-{
+class Col extends AppModel {
 
-  public function getusernames($term=null)
-  {
-    if(!empty($term)) {
-        $users = $this->User->find('list', array(
-          'conditions' => array('name' => new MongoRegex("/".$term."/i")),
-          'fields' => array('name')
-        ));
-        $this->log($users);
-        return $users;
-      }
-      return false;
-    }
-
-
-  protected $mongoSchema = array (
-    'did' => array (
-      'type' => 'string',
-      'null' => 'false' ,
-      'default' => null
-      ),
-    'aid' => array (
-      'type' => 'string',
-      'null' => 'false' ,
-      'default' => null
-      ),
-    'dstatus' => array (
-      'type' => 'string',
-      'null' => 'false' ,
-      'default' => '0'
-      )
+    var $mongoSchema = array(
+        'did' => array(
+            'type' => 'string',
+            'null' => 'false',
+            'default' => null
+        ),
+        'uid' => array(
+            'type' => 'string',
+            'null' => 'false',
+            'default' => null
+        ),
+        'status' => array(
+            'type' => 'string',
+            'null' => 'false',
+            'default' => '0'
+        ),
+        'token' => array(
+            'type' => 'string',
+            'null' => 'false',
+            'default' => '0'
+        ),
+        'created' => array(
+            'type' => 'timestamp',
+            'null' => 'false'
+        ),
+        'modified' => array(
+            'type' => 'timestamp',
+            'null' => 'false'
+        )
     );
+
 }

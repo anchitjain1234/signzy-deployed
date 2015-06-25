@@ -54,7 +54,7 @@ class User extends AppModel {
         return ($this->find('count', array('conditions' => array('username' => $this->data['User']['username']))) == 0);
     }
 
-    protected $mongoSchema = array(
+    var $mongoSchema = array(
         'name' => array(
             'type' => 'string',
             'null' => 'false',
@@ -79,6 +79,14 @@ class User extends AppModel {
             'type' => 'string',
             'null' => 'true',
             'default' => null
+        ),
+        'created' => array(
+            'type' => 'timestamp',
+            'null' => 'false'
+        ),
+        'modified' => array(
+            'type' => 'timestamp',
+            'null' => 'false'
         )
     );
 

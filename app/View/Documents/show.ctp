@@ -11,7 +11,7 @@
         <div class="col-md-1"><?php echo $this->Html->image('profile_new.png', array('alt' => 'Profile Picture')); ?></div>
         <div class="col-md-3"><h5><?php echo $name; ?></h5><h5>ABC Pvt. Ltd.</h5><h6></h6></div>
         <div class="col-md-8 text-right">
-          <?php $link = $this->Upload->uploadUrl($docudata, 'Document.avatar', array('urlize' => 'true'));?>
+          <?php $link=Router::url('/', true)."uploads/".$docudata['Document']['originalname'];?>
           <a href="<?php echo $link; ?>">Download</a> | <?php echo $this->Html->link('Trail', array('controller' => 'documents', 'action' => 'trail', $docudata['Document']['id'])); ?>
         </div>
       </div>

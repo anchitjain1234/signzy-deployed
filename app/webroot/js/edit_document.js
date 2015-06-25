@@ -117,7 +117,9 @@
             }
             else
             {
-                window.location = "../index";
+                console.log(res);
+                console.log('some error');
+                //window.location = "../index";
             }
         }).error(function (res) {
             alert('Error while saving data.Please try again later');

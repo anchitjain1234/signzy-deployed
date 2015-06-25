@@ -2,6 +2,7 @@
 #################################################
 /app/Plugin
 /app/webroot/upload
+/app/webroot/uploads
 /app/vendor
 /app/tmp
 /lib/Cake/Console/Templates/skel/tmp/

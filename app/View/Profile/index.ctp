@@ -72,7 +72,7 @@
                 foreach ($uploads as $upload):
                   echo "<tr><td>";
                   //$url="#";
-                  $url = Router::url('/', true).$this->Upload->uploadUrl($upload,'Document.avatar' , array('urlize' =>false ));
+                  $url = Router::url('/', true)."documents/show/".$upload['Document']['id'];
                   echo "<a href=\"".$url."\">";
                   echo $upload['Document']['name'];
                   echo "</a></td><td></td><td>";

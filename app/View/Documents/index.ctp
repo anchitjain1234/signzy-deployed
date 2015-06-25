@@ -35,13 +35,16 @@
                   //debug($this->params);
                   ?>
             <?php foreach ($user_documents_data as $user_document): ?>
-              <?php echo '<li class="list-group-item">';
-                    echo '<div class="row">';
-                    echo '<div class="col-md-8"><input type="checkbox" class="pull-left" />&nbsp;';
-                    //$url = Router::url('/', true).$this->Upload->uploadUrl($user_document, 'Document.avatar', array('urlize' => false));
-                    $url = $this->Html->link($user_document['Document']['name'], array('controller'=>'documents','action'=>'show',$user_document['Document']['id']),array('class'=>'pull-left'));
-                    echo $url.'</div>';
-                    echo '<div class="col-md-2 ">';
+              <?php 
+              echo "<li class=\"list-group-item\">";
+                    echo "<div class=\"row\">";
+                    echo "<div class=\"col-md-8\"><input type=\"checkbox\" class=\"pull-left\" />&nbsp;";
+                    $url = Router::url('/', true)."documents/show/".$user_document['Document']['id'];
+
+                    echo '<a class="pull-left" href="'.$url.'">';
+                    echo $user_document['Document']['name'];
+                    echo "</a></div>";
+                    echo "<div class=\"col-md-2 \">";
                     echo date('Y-M-d h:i:s', $user_document['Document']['created']->sec);
                     echo '</div>';
                     echo '<div class="col-md-2 pull-right">';
