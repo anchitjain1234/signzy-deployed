@@ -97,7 +97,7 @@ Configure::write('Dispatcher.filters', array(
 	'AssetDispatcher',
 	'CacheDispatcher'
 ));
-
+Configure::load('constants');
 /**
  * Configures default file logging options
  */

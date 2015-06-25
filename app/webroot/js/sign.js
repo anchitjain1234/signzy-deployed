@@ -54,7 +54,7 @@ $(function () {
 			method : "POST",
 			data : {"status":1,"userid":userid,"docuid":docuid}
 		});
-    window.location = "../dashboard";
+    window.location = "trail/"+docuid;
 	};
 
   $.reject_document = function(){
@@ -63,7 +63,7 @@ $(function () {
 			method : "POST",
 			data : {"status":3,"userid":userid,"docuid":docuid}
 		});
-    window.location = "../dashboard";
+    window.location = "trail/"+docuid;
   };
 
 	$.void_document = function(){
@@ -72,7 +72,7 @@ $(function () {
 			method : "POST",
 			data : {"status":2,"userid":userid,"docuid":docuid}
 		});
-    window.location = "../dashboard";
+    window.location = "trail/"+docuid;
   };
 
   $('#sure_success').click($.sign_document);

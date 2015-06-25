@@ -14,7 +14,7 @@
           </div>
           <h4 class="text-center">Send a New Document</h4>
           <br/>
-        </div>',array('controller'=>'documents','action'=>'upload2'),array('escape' => FALSE)) ?>
+        </div>',array('controller'=>'documents','action'=>'upload'),array('escape' => FALSE)) ?>
     </div>
 
 

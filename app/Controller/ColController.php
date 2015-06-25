@@ -34,25 +34,6 @@ class ColController extends AppController {
         }
     }
 
-    public function search_user() {
-        if ($this->request->is('ajax')) {
-            echo "going";
-            $parameters = array(
-                'conditions' => array('name' => new MongoRegex($term)),
-                'fields' => array('name')
-            );
-            $search_data = $this->User->find('all', $params);
-        }
-    }
-
-    public function index2() {
-        
-    }
-
-    public function test() {
-        
-    }
-
 }
 
 ?>

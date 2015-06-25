@@ -30,7 +30,7 @@ class ProfileController extends AppController {
         $this->set('uploads', $this->Document->find('all', $params));
 
         $params = array(
-            'conditions' => array('ownerid' => CakeSession::read('Auth.User.id'), 'status' => '3'),
+            'conditions' => array('ownerid' => CakeSession::read('Auth.User.id'), 'status' => Configure::read('doc_rejected')),
             'limit' => 5,
             'order' => array('created' => -1),
         );

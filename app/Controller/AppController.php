@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Application level Controller
  *
@@ -18,7 +19,6 @@
  * @since         CakePHP(tm) v 0.2.9
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-
 App::uses('Controller', 'Controller');
 
 /**
@@ -34,7 +34,24 @@ class AppController extends Controller {
 
     public $pageTitle;
 
+    public function get_temporary_document_name() {
+        $randombytes = openssl_random_pseudo_bytes(10);
+        return bin2hex($randombytes) . md5(rand() . time());
+    }
 
+    public function generate_token($email, $name) {
+        return str_shuffle(hash("sha512", (hash("sha256", $email . $name)) . strval(time()) . md5(rand())));
+    }
+
+    public function sendemail($email_view, $email_layout, $userdata, $link, $subject) {
+        $sign_document_email = new CakeEmail('mandrill_signup');
+        $sign_document_email->to($userdata['User']['username']);
+        $sign_document_email->subject($subject);
+        $sign_document_email->template($email_view, $email_layout)
+                ->viewVars(array('document_signing_link' => $link,
+                    'name_of_user' => $userdata['User']['name']));
+        return($sign_document_email->send());
+    }
 
     public $components = array(
         'Session',
@@ -42,9 +59,9 @@ class AppController extends Controller {
             'authenticate' => array(
                 'Form' => array(
                     'passwordHasher' => 'Blowfish'
-                    )
                 )
             )
-        );
+        )
+    );
 
 }
