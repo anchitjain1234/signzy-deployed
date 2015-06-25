@@ -3,6 +3,7 @@
 /app/Plugin
 /app/webroot/upload
 /app/webroot/uploads
+app/webroot/files
 /app/vendor
 /app/tmp
 /lib/Cake/Console/Templates/skel/tmp/
