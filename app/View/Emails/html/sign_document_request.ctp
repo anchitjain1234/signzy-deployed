@@ -127,7 +127,7 @@
               <tbody>
                   <tr>
                       <td align="center" valign="middle" class="mcnButtonContent" style="font-family: Arial; font-size: 16px; padding: 20px;">
-                          <a class="mcnButton " title="See Signing Request" href="<?php echo $document_signing_link ?>" target="_blank" style="font-weight: bold;letter-spacing: 1px;line-height: 100%;text-align: center;text-decoration: none;color: #D55258;">View Document Signing Request</a>
+                          <a class="mcnButton " title="See Signing Request" href="<?php echo $link ?>" target="_blank" style="font-weight: bold;letter-spacing: 1px;line-height: 100%;text-align: center;text-decoration: none;color: #D55258;">View Document Signing Request</a>
                       </td>
                   </tr>
               </tbody>

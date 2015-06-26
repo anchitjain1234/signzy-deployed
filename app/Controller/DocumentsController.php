@@ -354,19 +354,11 @@ class DocumentsController extends AppController {
                      'conditions' => array(
                          'id' => $owner_id['Document']['ownerid']
                      ),
-                     'fields' => array('username', 'name')
                  );
 
                  $owner_data = $this->User->find('first', $parameters);
-                 $document_change_email = new CakeEmail('mandrill_signup');
-                 $document_change_email->to($owner_data['User']['username']);
-                 $document_change_email->subject('Document Status Updated');
-                 $document_change_email->template('document_updated_request', 'notification_email_layout')
-                         ->viewVars(array('dashboard_link' =>
-                             Router::url(array('controller' => 'dashboard',
-                                 'action' => 'index'), true),
-                             'name_of_user' => $owner_data['User']['name']));
-                 $document_change_email->send();
+                 $link = Router::url(array('controller' => 'dashboard','action' => 'index'), true);
+                 $this->sendemail('document_updated_request', 'notification_email_layout', $owner_data, $link, 'Document Status Updated');
 
                  $this->Session->setFlash(__('Your status updated successfully.
                                      '), 'flash_success');
