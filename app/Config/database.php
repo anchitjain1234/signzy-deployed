@@ -69,15 +69,16 @@
 class DATABASE_CONFIG {
     public $default = array(
         'datasource' => 'Mongodb.MongodbSource',
-        'host' => 'ds041992.mongolab.com',
+        'host' => '127.0.0.1',
         'database' => 'verysure',
-        'port' => 41992,
+        'port' => 27017,
         'prefix' => '',
         'persistent' => 'true',
         
+/*
         'login' => 'anchitjain',
         'password' => 'fuckoff1234',
-        /*
+        
         'replicaset' => array('host' => 'mongodb://hoge:hogehoge@localhost:27021,localhost:27022/blog',
                               'options' => array('replicaSet' => 'myRepl')
                      ),
