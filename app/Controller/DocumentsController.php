@@ -204,7 +204,7 @@ class DocumentsController extends AppController {
              * Saving document so that document doesn't gets
              * lost from the temporary files.
              */
-            if (move_uploaded_file($_FILES['data']['tmp_name']['Document']['file'], '/home/anchit/uploads/' . $temporary_document_name)) {
+            if (move_uploaded_file($_FILES['data']['tmp_name']['Document']['file'], '/home/ubuntu/uploads/' . $temporary_document_name)) {
 
                 //echo $file;
                 echo '{"documentstatus" : true '
@@ -781,7 +781,7 @@ class DocumentsController extends AppController {
         /*
          * Change this url according to the location where document is getting saved.
          */
-        $docurl = '/home/anchit/uploads/' . $docname . '.' . $extension;
+        $docurl = '/home/ubuntu/uploads/' . $docname . '.' . $extension;
         $file_check = file_exists($docurl);
 
         if (!$file_check) {
@@ -859,7 +859,7 @@ class DocumentsController extends AppController {
             throw new NotFoundException(__('Invalid URL'));
         }
         
-        $docurl = '/home/anchit/uploads/' . $docname . '.' . $extension;
+        $docurl = '/home/ubuntu/uploads/' . $docname . '.' . $extension;
         $file_check = file_exists($docurl);
 
         if (!$file_check) {
