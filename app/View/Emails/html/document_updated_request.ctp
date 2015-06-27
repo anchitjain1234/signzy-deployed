@@ -127,7 +127,7 @@
               <tbody>
                   <tr>
                       <td align="center" valign="middle" class="mcnButtonContent" style="font-family: Arial; font-size: 16px; padding: 20px;">
-                          <a class="mcnButton " title="Dashboard" href="<?php echo $dashboard_link ?>" target="_blank" style="font-weight: bold;letter-spacing: 1px;line-height: 100%;text-align: center;text-decoration: none;color: #D55258;">View Dashboard</a>
+                          <a class="mcnButton " title="Dashboard" href="<?php echo $link; ?>" target="_blank" style="font-weight: bold;letter-spacing: 1px;line-height: 100%;text-align: center;text-decoration: none;color: #D55258;">View Dashboard</a>
                       </td>
                   </tr>
               </tbody>

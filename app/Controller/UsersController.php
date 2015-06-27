@@ -150,7 +150,7 @@ class UsersController extends AppController {
                 'token' => $token,
             )
         );
-        $userid = $this->User->find('all', $parameters);
+        $userid = $this->User->find('first', $parameters);
 
         if ($userid) {
             /*
@@ -166,7 +166,7 @@ class UsersController extends AppController {
               Set id for User equal to id found from using token and email as we would be updating the verification
               status of the user.
              */
-            $this->User->id = $userid['0']['User']['id'];
+            $this->User->id = $userid['User']['id'];
 
             if (!$this->User->exists()) {
                 throw new NotFoundException(__('Invalid URL'));

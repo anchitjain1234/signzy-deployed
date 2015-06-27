@@ -44,11 +44,13 @@ class AppController extends Controller {
     }
 
     public function sendemail($email_view, $email_layout, $userdata, $link, $subject) {
+        $this->log('userdata array');
+        $this->log($userdata);
         $sign_document_email = new CakeEmail('mandrill_signup');
         $sign_document_email->to($userdata['User']['username']);
         $sign_document_email->subject($subject);
         $sign_document_email->template($email_view, $email_layout)
-                ->viewVars(array('document_signing_link' => $link,
+                ->viewVars(array('link' => $link,
                     'name_of_user' => $userdata['User']['name']));
         return($sign_document_email->send());
     }

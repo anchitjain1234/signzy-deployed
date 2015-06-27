@@ -11,14 +11,23 @@
         <div class="col-md-1"><?php echo $this->Html->image('profile_new.png', array('alt' => 'Profile Picture')); ?></div>
         <div class="col-md-3"><h5><?php echo $name; ?></h5><h5>ABC Pvt. Ltd.</h5><h6></h6></div>
         <div class="col-md-8 text-right">
-          <?php $link=Router::url('/', true)."uploads/".$docudata['Document']['originalname'];?>
-          <a href="<?php echo $link; ?>">Download</a> | <?php echo $this->Html->link('Trail', array('controller' => 'documents', 'action' => 'trail', $docudata['Document']['id'])); ?>
+          <?php $name_seperated = explode(".", $docudata['Document']['originalname']); 
+ $name_front="";
+              for( $i=0;$i<count($name_seperated)-1;$i++)
+              {
+                  $name_front .= $name_seperated[$i];
+              }
+        ?>
+      <?php $link=Router::url('/', true)."documents/preview?name=".$name_front."&type=".$name_seperated[count($name_seperated)-1];
+            $download_link=Router::url('/', true)."documents/download?name=".$name_front."&type=".$name_seperated[count($name_seperated)-1];
+      ?>
+          <a href="<?php echo $download_link; ?>">Download</a> | <?php echo $this->Html->link('Trail', array('controller' => 'documents', 'action' => 'trail', $docudata['Document']['id'])); ?>
         </div>
       </div>
 
       <div class="row top-buffer">
         <div class="col-md-12 bg-highlight" style="height:400px;">
-          <?php echo "<embed src='".$link."' width = '1100' height = '380'></embed>"; ?>
+          <?php echo "<iframe src='".$link."' width = '1100' height = '380'></iframe>"; ?>
         </div>
       </div>
 

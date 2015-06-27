@@ -30,18 +30,30 @@ class DocumentsController extends AppController {
     /*
      * It shows all the documents in which current logged in user is involved.
      */
+
     public function index() {
         /*
           To display all the previous uploaded documents of the user as well as the documents in which the
-          user id requested to sign it.
+          user id requested to sign it i.e. 
+         * documents of which user is owner as well as docs in which he is collabarator.
          */
-
+        
+        /*
+         * $docs_with_timeaskey will constain docinfo with its modified time as key
+         * value.
+         * We are us
+         */
+        $docs_with_timeaskey = [];
         $uid = CakeSession::read('Auth.User.id');
         $parameters = array(
             'conditions' => array('ownerid' => $uid),
         );
         $user_documents_data = $this->Document->find('all', $parameters);
-
+        
+        foreach($user_documents_data as $doc):
+            $docs_with_timeaskey[$doc['Document']['modified']->sec] = $doc;
+        endforeach;
+        
         /*
           Now finding documents in which user is a collabarator
          */
@@ -56,15 +68,16 @@ class DocumentsController extends AppController {
                 $parameters = array(
                     'conditions' => array('id' => $col['Col']['did']),
                 );
-                array_push($user_documents_data, $this->Document->find('first', $parameters));
+            $doc_data = $this->Document->find('first', $parameters);
+            $docs_with_timeaskey[$doc_data['Document']['modified']->sec]  = $doc_data;
+                array_push($user_documents_data,$doc_data );
             endforeach;
         }
-        $this->set('user_documents_data', $user_documents_data);
+        krsort($docs_with_timeaskey);
+        $this->set('user_documents_data', $docs_with_timeaskey);
     }
 
-    
-
-     public function upload() {
+    public function upload() {
 
         if ($this->request->is('post')) {
             $this->autorender = false;
@@ -145,9 +158,7 @@ class DocumentsController extends AppController {
                                             , "docuid" => $docid['Document']['id']])
                                             , true);
                             $this->sendemail('sign_document_request', 'notification_email_layout', $userdata, $document_signing_link, 'Document Signing Request');
-                        }
-                        else
-                        {
+                        } else {
                             echo '{"finaldocstatus":false,"error":2}';
                         }
                     endforeach;
@@ -193,8 +204,9 @@ class DocumentsController extends AppController {
              * Saving document so that document doesn't gets
              * lost from the temporary files.
              */
-            if (move_uploaded_file($_FILES['data']['tmp_name']['Document']['file'], WWW_ROOT . 'uploads/' . $temporary_document_name)) {
+            if (move_uploaded_file($_FILES['data']['tmp_name']['Document']['file'], '/home/anchit/uploads/' . $temporary_document_name)) {
 
+                //echo $file;
                 echo '{"documentstatus" : true '
                 . ',"documentname" : "' . $temporary_document_name . '"'
                 . ',"documentsize":' . $_FILES['data']['size']['Document']['file'] . ''
@@ -210,172 +222,165 @@ class DocumentsController extends AppController {
     /*
      * It signs the document.
      */
-     public function sign() {
 
-         if ($this->request->is('get')) {
-             /*
-               Check if the entered url is valid or not
-              */
-             if (isset($this->params['url']['token']) && isset($this->params['url']['userid']) &&
-                     isset($this->params['url']['docuid'])) {
-                 /*
-                   Checking if the current logged in user is the user that was requested to sign the document.
-                   Otherwise logout the current user and ask him to login again with the account which was requested to
-                   sign
-                  */
-                 if (AuthComponent::user('id')) {
-                     if (CakeSession::read("Auth.User.id") === $this->params['url']['userid']) {
-                         $token = $this->params['url']['token'];
-                         $userid = $this->params['url']['userid'];
-                         $docuid = $this->params['url']['docuid'];
-                     } else {
-                         $this->Auth->logout();
-                         $this->Session->setFlash(__('Please login with your account to sign the document.'), 'flash_warning');
-                         return $this->redirect(array('controller' => 'users', 'action' => 'index'));
-                     }
-                 }
-             } else {
-                 throw new NotFoundException(__('Invalid URL'));
-             }
+    public function sign() {
 
-             /*
-               If URL is valid check whether presented variables in URL are present in databse or not
-              */
-             $this->loadModel('Col');
-             $parameters = array(
-                 'conditions' => array(
-                     'uid' => $userid,
-                     'token' => $token,
-                     'did' => $docuid
-                 ),
-                 'fields' => array('id', 'status')
-             );
-             $coldata = $this->Col->find('first', $parameters);
+        if ($this->request->is('get')) {
+            /*
+              Check if the entered url is valid or not
+             */
+            if (isset($this->params['url']['token']) && isset($this->params['url']['userid']) &&
+                    isset($this->params['url']['docuid'])) {
+                /*
+                  Checking if the current logged in user is the user that was requested to sign the document.
+                  Otherwise logout the current user and ask him to login again with the account which was requested to
+                  sign
+                 */
+                if (AuthComponent::user('id')) {
+                    if (CakeSession::read("Auth.User.id") === $this->params['url']['userid']) {
+                        $token = $this->params['url']['token'];
+                        $userid = $this->params['url']['userid'];
+                        $docuid = $this->params['url']['docuid'];
+                    } else {
+                        $this->Auth->logout();
+                        $this->Session->setFlash(__('Please login with your account to sign the document.'), 'flash_warning');
+                        return $this->redirect(array('controller' => 'users', 'action' => 'index'));
+                    }
+                }
+            } else {
+                throw new NotFoundException(__('Invalid URL'));
+            }
 
-             if ($coldata) {
-                 /*
-                   If all the variables are correct show the document to the user and render the view
-                  */
-                 $this->set('document', $this->Document->findById($docuid));
-                 $this->render();
-                 /*
-                   Add code here to change the token so that the URL is no longer valid
-                  */
-             } else {
-                 $this->Session->setFlash(__('Invalid Request.Please ask the document owner to resend you the signing email
+            /*
+              If URL is valid check whether presented variables in URL are present in databse or not
+             */
+            $this->loadModel('Col');
+            $parameters = array(
+                'conditions' => array(
+                    'uid' => $userid,
+                    'token' => $token,
+                    'did' => $docuid
+                ),
+                'fields' => array('id', 'status')
+            );
+            $coldata = $this->Col->find('first', $parameters);
+
+            if ($coldata) {
+                /*
+                  If all the variables are correct show the document to the user and render the view
+                 */
+                $this->set('document', $this->Document->findById($docuid));
+                $this->render();
+                /*
+                  Add code here to change the token so that the URL is no longer valid
+                 */
+            } else {
+                $this->Session->setFlash(__('Invalid Request.Please ask the document owner to resend you the signing email
                                      '), 'flash_error');
-                 return $this->redirect(array('controller' => 'dashboard', 'action' => 'index'));
-             }
-         }
+                return $this->redirect(array('controller' => 'dashboard', 'action' => 'index'));
+            }
+        }
 
-         if ($this->request->is('post')) {
-             /*
-               Storing these values in variables as data would be unset so that these fields dont get saved while
-               updating the col and document tables
-              */
-             $status = $this->request->data['status'];
-             $docuid = $this->request->data['docuid'];
+        if ($this->request->is('post')) {
+            /*
+              Storing these values in variables as data would be unset so that these fields dont get saved while
+              updating the col and document tables
+             */
+            $status = $this->request->data['status'];
+            $docuid = $this->request->data['docuid'];
 
-             $this->loadModel('Col');
-             $parameters = array(
-                 'conditions' => array(
-                     'uid' => $this->request->data['userid'],
-                     'did' => $this->request->data['docuid']
-                 ),
-                 'fields' => array('id', 'status')
-             );
-             $coldata = $this->Col->find('first', $parameters);
+            $this->loadModel('Col');
+            $parameters = array(
+                'conditions' => array(
+                    'uid' => $this->request->data['userid'],
+                    'did' => $this->request->data['docuid']
+                ),
+                'fields' => array('id', 'status')
+            );
+            $coldata = $this->Col->find('first', $parameters);
 
-             /*
-               Set the col id so that it can be updated
-              */
-             $this->Col->id = $coldata['Col']['id'];
-             $this->Col->set('status', $userdata['User']['id']);
+            /*
+              Set the col id so that it can be updated
+             */
+            $this->Col->id = $coldata['Col']['id'];
+            $this->Col->set('status', $userdata['User']['id']);
 
-             /*
-               Unset these variables so that they dont get saved.
-              */
-             unset($this->request->data['userid']);
-             unset($this->request->data['docuid']);
+            /*
+              Unset these variables so that they dont get saved.
+             */
+            unset($this->request->data['userid']);
+            unset($this->request->data['docuid']);
 
-             if ($this->Col->save($this->request->data)) {
-                 $total_collabarators = $this->Col->find('count', array('conditions' => array('did' => $docuid)));
-                 /*
-                   See here if he document has to be rejected even if one user rejects it or not,
-                   Checking if current user voided or rejected the document
-                  */
-                 if ($status === Configure::read('doc_void') || $status === Configure::read('doc_rejected')) {
-                     /*
-                       Even if one user voids or rejects the document whole document is voided or rejected
-                      */
-                     $this->Document->id = $docuid;
-                     $this->Document->set('status', $status);
-                     $this->Document->save();
-                 }
-                 /*
-                   Checking if current user signed the document.
-                  */ elseif ($status === Configure::read('doc_completed')) {
-                     /*
-                       If all the signatories sign the document than only document will have status complete i.e. 1
-                      */
-                     $parameters = array(
-                         'conditions' => array(
-                             'did' => $docuid,
-                             'status' => Configure::read('doc_completed')
-                         )
-                     );
-                     $collabarators_with_completed_status = $this->Col->find('count', $parameters);
+            if ($this->Col->save($this->request->data)) {
+                $total_collabarators = $this->Col->find('count', array('conditions' => array('did' => $docuid)));
+                /*
+                  See here if he document has to be rejected even if one user rejects it or not,
+                  Checking if current user voided or rejected the document
+                 */
+                if ($status === Configure::read('doc_void') || $status === Configure::read('doc_rejected')) {
+                    /*
+                      Even if one user voids or rejects the document whole document is voided or rejected
+                     */
+                    $this->Document->id = $docuid;
+                    $this->Document->set('status', $status);
+                    $this->Document->save();
+                }
+                /*
+                  Checking if current user signed the document.
+                 */ elseif ($status === Configure::read('doc_completed')) {
+                    /*
+                      If all the signatories sign the document than only document will have status complete i.e. 1
+                     */
+                    $parameters = array(
+                        'conditions' => array(
+                            'did' => $docuid,
+                            'status' => Configure::read('doc_completed')
+                        )
+                    );
+                    $collabarators_with_completed_status = $this->Col->find('count', $parameters);
 
-                     /*
-                       Checking if document signing has been completed or not.
-                      */
-                     if ($collabarators_with_completed_status === $total_collabarators) {
-                         $this->Document->id = $docuid;
-                         $this->Document->set('status', "1");
-                         $this->Document->save();
-                     }
-                 }
+                    /*
+                      Checking if document signing has been completed or not.
+                     */
+                    if ($collabarators_with_completed_status === $total_collabarators) {
+                        $this->Document->id = $docuid;
+                        $this->Document->set('status', "1");
+                        $this->Document->save();
+                    }
+                }
 
-                 /*
-                   Sending the notification email to the owner that there has been some changes in document.
-                   Letting him to know to visit the dashboard
-                   Will add the option in future to disable email alert for every status update.
-                   Also include here to send the emails to all the other collabarators also to notify them of the change.
-                  */
-                 $parameters = array(
-                     'conditions' => array(
-                         'id' => $docuid
-                     ),
-                     'fields' => array('ownerid')
-                 );
-                 $owner_id = $this->Document->find('first', $parameters);
+                /*
+                  Sending the notification email to the owner that there has been some changes in document.
+                  Letting him to know to visit the dashboard
+                  Will add the option in future to disable email alert for every status update.
+                  Also include here to send the emails to all the other collabarators also to notify them of the change.
+                 */
+                $parameters = array(
+                    'conditions' => array(
+                        'id' => $docuid
+                    ),
+                    'fields' => array('ownerid')
+                );
+                $owner_id = $this->Document->find('first', $parameters);
 
-                 $parameters = array(
-                     'conditions' => array(
-                         'id' => $owner_id['Document']['ownerid']
-                     ),
-                     'fields' => array('username', 'name')
-                 );
+                $parameters = array(
+                    'conditions' => array(
+                        'id' => $owner_id['Document']['ownerid']
+                    ),
+                );
 
-                 $owner_data = $this->User->find('first', $parameters);
-                 $document_change_email = new CakeEmail('mandrill_signup');
-                 $document_change_email->to($owner_data['User']['username']);
-                 $document_change_email->subject('Document Status Updated');
-                 $document_change_email->template('document_updated_request', 'notification_email_layout')
-                         ->viewVars(array('dashboard_link' =>
-                             Router::url(array('controller' => 'dashboard',
-                                 'action' => 'index'), true),
-                             'name_of_user' => $owner_data['User']['name']));
-                 $document_change_email->send();
+                $owner_data = $this->User->find('first', $parameters);
+                $link = Router::url(array('controller' => 'dashboard', 'action' => 'index'), true);
+                $this->sendemail('document_updated_request', 'notification_email_layout', $owner_data, $link, 'Document Status Updated');
 
-                 $this->Session->setFlash(__('Your status updated successfully.
+                $this->Session->setFlash(__('Your status updated successfully.
                                      '), 'flash_success');
-             } else {
-                 $this->Session->setFlash(__('Error while saving your data.Please try again later.
+            } else {
+                $this->Session->setFlash(__('Error while saving your data.Please try again later.
                                      '), 'flash_error');
-             }
-         }
-     }
+            }
+        }
+    }
 
     /*
      * This function shows the document , download and trail options and
@@ -543,6 +548,7 @@ class DocumentsController extends AppController {
      * Used for changing document name and signatories.
      * AJAX request from edit page will be sent here.
      */
+
     public function change_document() {
         $status_object = new ArrayObject(array(), ArrayObject::STD_PROP_LIST);
         /*
@@ -664,7 +670,7 @@ class DocumentsController extends AppController {
                         $this->Col->set('did', $docuid);
                         $user_with_this_email = $this->User->find('first', array('conditions' => array('username' => $email)));
                         $this->Col->set('uid', $user_with_this_email['User']['id']);
-                        $token = $this->generate_token($email,$user_with_this_email['User']['name']);
+                        $token = $this->generate_token($email, $user_with_this_email['User']['name']);
                         $this->Col->set('token', $token);
                         $this->Col->set('status', "0");
                         $this->Col->save();
@@ -673,12 +679,12 @@ class DocumentsController extends AppController {
                           Add code here for sending signing link to the new collaborators
                          */
                         $document_signing_link = Router::url(array('controller' => 'documents',
-                                        'action' => 'sign',
-                                        "?" => [
-                                            "userid" => $user_with_this_email['User']['id']
-                                            , "token" => $token
-                                            , "docuid" => $docuid])
-                                            , true);
+                                    'action' => 'sign',
+                                    "?" => [
+                                        "userid" => $user_with_this_email['User']['id']
+                                        , "token" => $token
+                                        , "docuid" => $docuid])
+                                        , true);
                         $this->sendemail('sign_document_request', 'notification_email_layout', $user_with_this_email, $document_signing_link, 'Document Signing Request');
                     }
                 endforeach;
@@ -735,6 +741,170 @@ class DocumentsController extends AppController {
 
         $this->set(compact('status_object'));
         $this->set('_serialize', 'status_object');
+    }
+
+    /*
+     * To preview the document.
+     * Only available to the document owner and its collabarators.
+     */
+
+    public function preview() {
+
+        $this->layout = false;
+        /*
+         * This flag variable is needed for the case when document is shown while uploading
+         * As at that time document doesnt gets saved into the database so we need to
+         * skip checking for that.
+         */
+        $nochecking_flag = 0;
+
+        if (isset($this->params['url']['name']) && isset($this->params['url']['type'])) {
+            $docname = $this->params['url']['name'];
+            $extension = $this->params['url']['type'];
+            /*
+             * status would be set to temp if document is needed to be viewed while uploading.
+             * 
+             * One bug is there that when document doesnt gets saved into database but remains saved 
+             * in our location anyone can view that document by setting status variable to temp.
+             */
+            if (isset($this->params['url']['status']) && $this->params['url']['status'] === 'temp') {
+                /*
+                 * Set the nochecking flag so that we skip checking if user is allowed to view document
+                 * or not.
+                 */
+                $nochecking_flag = 1;
+            }
+        } else {
+            throw new NotFoundException(__('Invalid URL'));
+        }
+        
+        /*
+         * Change this url according to the location where document is getting saved.
+         */
+        $docurl = '/home/anchit/uploads/' . $docname . '.' . $extension;
+        $file_check = file_exists($docurl);
+
+        if (!$file_check) {
+            throw new NotFoundException(__('Invalid URL'));
+        }
+        $colids = [];
+        
+        $this->loadModel('Col');
+        /*
+         * Finding info about the document 
+         */
+        $docinfo = $this->Document->find('first', array('conditions' => array('originalname' => $docname . '.' . $extension)));
+        /*
+         * If any info is found out related to the document.
+         */
+        if (isset($docinfo) && sizeof($docinfo) > 0) {
+            /*
+             * If any info related to the doc is find out unset the nochecking flag even if the 
+             * status is set temp.
+             * Temp status would work only when document doesnt gets saved in database.
+             */
+            $nochecking_flag = 0;
+            $cols = $this->Col->find('all', array('conditions' => array('did' => $docinfo['Document']['id'])));
+
+            /*
+             * colids would contain userids of all the collabarators.
+             */
+            $colids = [];
+
+            /*
+             * FIrst pushing ownerid into colids.
+             */
+            array_push($colids, $docinfo['Document']['ownerid']);
+
+            foreach ($cols as $col):
+                array_push($colids, $col['Col']['uid']);
+            endforeach;
+        }
+        /*
+         * If userid of current logged in user falls in colids array or the request is having temp 
+         * status than show the doc to user else show 404 error.
+         */
+        if (in_array(CakeSession::read('Auth.User.id'), $colids) || $nochecking_flag === 1) {
+
+            if (strtolower($extension) === 'pdf') {
+                header('Content-Type: application/pdf');
+            } elseif (strtolower($extension) === 'doc' || strtolower($extension)=== 'docx') {
+                header('Content-Type: application/doc');
+            }
+
+            header("Content-Length: " . filesize($docurl));
+            readfile($docurl);
+        } else {
+            throw new NotFoundException(__('Invalid URL'));
+        }
+    }
+    
+    /*
+     * To download the document .
+     * Only available to document owners and collabarators .
+     * No temp status available.
+     */
+    public function download() {
+        /*
+         * Same code as preview .
+         * Only change is that no temp request is available.
+         * Also one extra header is addded to download the document directly.
+         */
+        $this->layout = false;
+        
+        if (isset($this->params['url']['name']) && isset($this->params['url']['type'])) {
+            $docname = $this->params['url']['name'];
+            $extension = $this->params['url']['type'];
+        } else {
+            throw new NotFoundException(__('Invalid URL'));
+        }
+        
+        $docurl = '/home/anchit/uploads/' . $docname . '.' . $extension;
+        $file_check = file_exists($docurl);
+
+        if (!$file_check) {
+            throw new NotFoundException(__('Invalid URL'));
+        }
+
+        $this->loadModel('Col');
+        /*
+         * Finding info about the document 
+         */
+        $docinfo = $this->Document->find('first', array('conditions' => array('originalname' => $docname . '.' . $extension)));
+
+        if (isset($docinfo) && sizeof($docinfo) > 0) {
+            
+            $cols = $this->Col->find('all', array('conditions' => array('did' => $docinfo['Document']['id'])));
+            
+            $colids = [];
+            array_push($colids, $docinfo['Document']['ownerid']);
+            
+            foreach ($cols as $col):
+                array_push($colids, $col['Col']['uid']);
+            endforeach;
+        }
+        else {
+            throw new NotFoundException(__('Invalid URL'));
+        }
+        
+        if (in_array(CakeSession::read('Auth.User.id'), $colids)) {
+
+            if (strtolower($extension) === 'pdf') {
+                
+                header('Content-Type: application/pdf');
+                header("Content-Disposition:attachment;filename='" . $docinfo['Document']['name'] . "_from_verysure." . $extension . "'");
+                
+            } elseif (strtolower($extension) === 'doc' || strtolower($extension)=== 'docx' ) {
+                
+                header('Content-Type: application/doc');
+                header("Content-Disposition:attachment;filename='" . $docinfo['Document']['name'] . "_from_verysure." . $extension . "'");
+            }
+
+            header("Content-Length: " . filesize($docurl));
+            readfile($docurl);
+        } else {
+            throw new NotFoundException(__('Invalid URL'));
+        }
     }
 
 }
