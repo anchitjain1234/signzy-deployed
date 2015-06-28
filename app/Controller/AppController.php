@@ -34,6 +34,24 @@ class AppController extends Controller {
 
     public $pageTitle;
 
+    public function beforeRender() {
+        if ($this->name == 'CakeError') {
+            if (AuthComponent::user('id')) {
+                $this->layout = 'insidelayout';
+                $uid = CakeSession::read("Auth.User.id");
+                $params = array(
+                    'fields' => array('name', 'verified'),
+                    'conditions' => array('id' => $uid),
+                );
+                $this->loadModel('User');
+                $userdata = $this->User->find('first', $params);
+                $this->set('name', $userdata['User']['name']);
+            } else {
+                $this->layout = 'mainlayout';
+            }
+        }
+    }
+
     public function get_temporary_document_name() {
         $randombytes = openssl_random_pseudo_bytes(10);
         return bin2hex($randombytes) . md5(rand() . time());
