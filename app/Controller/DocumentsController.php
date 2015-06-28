@@ -80,6 +80,7 @@ class DocumentsController extends AppController {
     public function upload() {
 
         if ($this->request->is('post')) {
+            $this->request->onlyAllow('ajax');
             $this->autorender = false;
             $this->layout = false;
             $emails = json_decode($this->request->data['emails']);
@@ -181,6 +182,7 @@ class DocumentsController extends AppController {
     }
 
     public function upload_ajax() {
+        $this->request->onlyAllow('ajax');
         $this->autorender = false;
         $this->layout = false;
         $allowed = array('doc', 'pdf', 'docx');
@@ -286,6 +288,7 @@ class DocumentsController extends AppController {
               Storing these values in variables as data would be unset so that these fields dont get saved while
               updating the col and document tables
              */
+            $this->request->onlyAllow('ajax');
             $status = $this->request->data['status'];
             $docuid = $this->request->data['docuid'];
 
@@ -457,6 +460,7 @@ class DocumentsController extends AppController {
      */
 
     public function delete() {
+        $this->request->onlyAllow('ajax');
         if ($this->request->is('post')) {
 
             $id = $this->request->data['docuid'];
@@ -550,6 +554,7 @@ class DocumentsController extends AppController {
      */
 
     public function change_document() {
+        $this->request->onlyAllow('ajax');
         $status_object = new ArrayObject(array(), ArrayObject::STD_PROP_LIST);
         /*
          * This flag would be used to check whether we need to change the status of document

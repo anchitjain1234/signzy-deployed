@@ -22,6 +22,7 @@ class ColController extends AppController {
     }
 
     public function index() {
+        $this->request->onlyAllow('ajax');
         if ($this->request->is('ajax')) {
             $term = $this->request->query('term');
             $userNames = $this->User->find('list', array(
