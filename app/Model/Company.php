@@ -30,7 +30,7 @@ class Company extends AppModel {
     );
     
     public function checkname() {
-        return ($this->find('count', array('conditions' => array('name' => $this->data['Company']['name']))) == 0);
+        return ($this->find('count', array('conditions' => array(strtolower('name') => strtolower($this->data['Company']['name']))) == 0);
     }
 
 }
