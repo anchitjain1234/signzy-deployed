@@ -23,6 +23,10 @@ class Col extends AppModel {
             'null' => 'false',
             'default' => '0'
         ),
+        'cid' => array(
+            'type' => 'string',
+            'null' => 'false'
+        ),
         'created' => array(
             'type' => 'timestamp',
             'null' => 'false'
