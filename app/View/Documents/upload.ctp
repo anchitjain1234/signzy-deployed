@@ -2,7 +2,7 @@
 
 <div class="container" id="drop">
     <div id="alertdiv">
-        
+
     </div>
     <div class="row">
         <div class="col-md-6" style="height:500px;  " id="upload_preview">
@@ -46,14 +46,14 @@
         </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <button type="button" class="close" id="close_modal_btn_upper" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title" id="myModalLabel">Add a signatory</h4>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body row">
 
                         <div class="form-group">
                             <?php echo $this->Form->label('usernsme', 'Email:', array('class' => 'control-label')); ?>
@@ -61,35 +61,36 @@
                             <div id="results"></div>
                             <div id="empty-message"></div>
                         </div>
-                        <!--
+
                         <div class="form-group">
-                          <label for="inputEmail3" class="col-sm-4 control-label">Authorized Company</label>
-            
-                          <div class="col-sm-4">
-                            <input type="radio" name="company"> Company 1 <br/>
-                            <input type="radio" name="company"> Company 2 <br/>
-                            <input type="radio" name="company"> Company 3 <br/>
-            
-                            <br/>
-                            <button type="button" class="btn btn-default" id="add_company"><span class="glyphicon glyphicon-plus"></span>Add</button>
-                          </div>
-                          <div class="col-sm-4"></div>
+                            <label for="inputEmail3" class="col-sm-4 control-label">Authorized Company</label>
+
+                            <div class="col-sm-8">
+                                <div id="recent_companies_list" >
+                                </div>
+                                <br/>
+                                <input type="text" id="company_name_input" placeholder="Enter company name here" class="form-control"/>
+                                <div id="company_search_results"></div>
+                                <div id="company-empty-message"></div>
+                                <button type="button" class="btn btn-default" id="add_company_btn"><span class="glyphicon glyphicon-plus"></span>Add</button>
+                                <button type="button" class="btn btn-danger" id="close_company_add_btn" style="display:none"><span class="glyphicon glyphicon-remove"></span>Close</button>
+                            </div>
                         </div>
-            
+                        
                         <div class="form-group">
-                          <div class="col-sm-offset-4 col-sm-8">
-                            <div class="checkbox">
+                          <div class="col-sm-offset-0.5 col-sm-8">
+                            <div class="checkbox" id="biometric_checkbox_div">
                               <label>
-                                <input type="checkbox"> Biometric required?
+                                <input type="checkbox" name="biometric_checkbox"> Biometric required?
                               </label>
                             </div>
                           </div>
                         </div>
-                        -->
+                        
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="add_button">Add</button>
+                        <button type="button" class="btn btn-default" id="close_modal_btn">Close</button>
+                        <button type="button" class="btn btn-primary" id="add_button" disabled="disabled">Add</button>
                     </div>
                 </div>
             </div>

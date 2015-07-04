@@ -35,6 +35,7 @@ class AppController extends Controller {
     public $pageTitle;
 
     public function beforeRender() {
+        
         if ($this->name == 'CakeError') {
             if (AuthComponent::user('id')) {
                 $this->layout = 'insidelayout';
@@ -53,17 +54,23 @@ class AppController extends Controller {
     }
 
     public function get_temporary_document_name() {
+        /*
+         * Generating name which would be used to save the uploaded file in upload location.
+         */
         $randombytes = openssl_random_pseudo_bytes(10);
         return bin2hex($randombytes) . md5(rand() . time());
     }
 
     public function generate_token($email, $name) {
+        /*
+         * Generating token as shuffled string of
+         * sha 512 hash of -> (sha 256 hash of username(i.e. email) + name )+ current timestamp
+         * + md5 hash of random number
+         */
         return str_shuffle(hash("sha512", (hash("sha256", $email . $name)) . strval(time()) . md5(rand())));
     }
 
     public function sendemail($email_view, $email_layout, $userdata, $link, $subject) {
-        $this->log('userdata array');
-        $this->log($userdata);
         $sign_document_email = new CakeEmail('mandrill_signup');
         $sign_document_email->to($userdata['User']['username']);
         $sign_document_email->subject($subject);
@@ -71,6 +78,41 @@ class AppController extends Controller {
                 ->viewVars(array('link' => $link,
                     'name_of_user' => $userdata['User']['name']));
         return($sign_document_email->send());
+    }
+    
+    public function send_general_email($userdata,$link,$title,$content,$subject,$button_text) {
+        $email = new CakeEmail('mandrill_signup');
+        $email->template('general_email', 'notification_email_layout')
+              ->viewVars(array('link' => $link,
+                    'name_of_user' => $userdata['User']['name'],
+                    'title_for_email' => $title,
+                     'content_for_email'=>$content,
+                  'button_text'=>$button_text));
+        $email ->to($userdata['User']['username']);
+        $email->subject($subject);
+        return($email->send());
+    }
+    
+    public function company_name_from_email_check($email,$company_name)
+    {
+        /*
+         * Getting the text from email address between "@" and first "."
+         * i.e. a@asdasd.com will give asdasd
+         * f@as.we.23.com will give as
+         */
+        preg_match("/\@(.*?)\./", $email, $regex_output);
+        /*
+         * Here flaw is that we are getting text only till first "."
+         * instead we should get till last "." so that false negatives can be reduced but 
+         * this would be increasing false positives.
+         */
+        $company_name_from_email = strtolower($regex_output[1]);
+        
+        /*
+         * Getting similarity between lowered case of 
+         */
+        similar_text($company_name_from_email, strtolower($company_name), $percent);
+        return $percent;
     }
 
     public $components = array(

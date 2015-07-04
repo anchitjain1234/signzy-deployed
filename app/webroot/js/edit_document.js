@@ -109,7 +109,7 @@
         $.ajax({
             url: '../change_document.json',
             method: "POST",
-            data: {"emails": emails_json, "newname": newname, "docuid": $('.docidholder').attr('id')}
+            data: {"ids": emails_json, "newname": newname, "docuid": $('.docidholder').attr('id')}
         }).success(function (res) {
             if (res['status'])
             {

@@ -1,5 +1,5 @@
 <?php
-Router::parseExtensions();
+Router::parseExtensions('json');
 /**
  * Routes configuration
  *

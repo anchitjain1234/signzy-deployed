@@ -34,189 +34,419 @@ class DocumentsController extends AppController {
     public function index() {
         /*
           To display all the previous uploaded documents of the user as well as the documents in which the
-          user id requested to sign it i.e. 
+          user id requested to sign it i.e.
          * documents of which user is owner as well as docs in which he is collabarator.
          */
-        
+
         /*
          * $docs_with_timeaskey will constain docinfo with its modified time as key
          * value.
-         * We are us
          */
+
         $docs_with_timeaskey = [];
+
         $uid = CakeSession::read('Auth.User.id');
+
         $parameters = array(
             'conditions' => array('ownerid' => $uid),
         );
         $user_documents_data = $this->Document->find('all', $parameters);
-        
-        foreach($user_documents_data as $doc):
+
+        foreach ($user_documents_data as $doc):
             $docs_with_timeaskey[$doc['Document']['modified']->sec] = $doc;
         endforeach;
-        
+
         /*
           Now finding documents in which user is a collabarator
          */
+
         $this->loadModel('Col');
+
         $parameters = array(
             'fields' => array('did'),
-            'conditions' => array('uid' => $uid),
+            'conditions' => array('uid' => $uid)
         );
         $coldata = $this->Col->find('all', $parameters);
+
+        $this->loadModel('Compmember');
+        debug($coldata);
         if ($coldata) {
             foreach ($coldata as $col):
-                $parameters = array(
-                    'conditions' => array('id' => $col['Col']['did']),
-                );
-            $doc_data = $this->Document->find('first', $parameters);
-            $docs_with_timeaskey[$doc_data['Document']['modified']->sec]  = $doc_data;
-                array_push($user_documents_data,$doc_data );
+
+                if (isset($col['Col']['cid'])) {
+                    $status = array();
+                    array_push($status, array('status' => Configure::read('legal_head')));
+                    array_push($status, array('status' => Configure::read('auth_sign')));
+                    $authorized_check = $this->Compmember->find('count', array('conditions' => array('cid' => $col['Col']['cid'], 'uid' => $col['Col']['uid'], '$or' => $status)));
+                    if ($authorized_check != 0) {
+                        $parameters = array(
+                            'conditions' => array('id' => $col['Col']['did']),
+                        );
+
+                        $doc_data = $this->Document->find('first', $parameters);
+                        $docs_with_timeaskey[$doc_data['Document']['modified']->sec] = $doc_data;
+                        array_push($user_documents_data, $doc_data);
+                    }
+                } else {
+                    $parameters = array(
+                        'conditions' => array('id' => $col['Col']['did']),
+                    );
+
+                    $doc_data = $this->Document->find('first', $parameters);
+                    debug($doc_data);
+                    $docs_with_timeaskey[$doc_data['Document']['modified']->sec] = $doc_data;
+                    array_push($user_documents_data, $doc_data);
+                }
             endforeach;
         }
         krsort($docs_with_timeaskey);
         $this->set('user_documents_data', $docs_with_timeaskey);
     }
 
+    /*
+     * It will save the document in document and col database.
+     * The data will be provided from upload_ajax
+     */
+
     public function upload() {
+        $flag_for_not_sending_email_to_legal_head = 0;
 
         if ($this->request->is('post')) {
+
             $this->request->onlyAllow('ajax');
             $this->autorender = false;
             $this->layout = false;
+
             $emails = json_decode($this->request->data['emails']);
+            $companies_info = $this->request->data['company_info'];
+            $biometric_info = json_decode($this->request->data['biometric_info']);
+
+            $this->log($companies_info);
+            $this->log($biometric_info);
+
             $current_name = $this->request->data['doc_name'];
+
             /*
              * If user does not specifies the document name ,we would give name of the document as its original name.
              */
+
             if (isset($this->request->data['name']) && $this->request->data['name'] != "") {
                 $change_to_name = $this->request->data['name'];
             } else {
                 $change_to_name = $this->request->data['doc_org_name'];
             }
+
             $original_name = $this->request->data['doc_org_name'];
             $size = $this->request->data['doc_size'];
             $type = $this->request->data['doc_type'];
 
+            $owner_data = $this->User->find('first', array('conditions' => array('id' => CakeSession::read('Auth.User.id'))));
             /*
-             * Saving document data . In document table "originalname" refers to the name
-             * by ehich file is stored in the storage area
-             * and "name" refers to the name given by user.
+             * Checking if file with name provided exists in location or not.
              */
-            $this->Document->create();
-            $this->Document->set('name', $change_to_name);
-            $this->Document->set('size', $size);
-            $this->Document->set('type', $type);
-            $this->Document->set('originalname', $current_name);
-            $this->Document->set('ownerid', CakeSession::read("Auth.User.id"));
-            $this->Document->set('status', "0");
-            if ($this->Document->save()) {
-                /*
-                 * Checking if any signatories are there or not.
-                 */
-                if (count($emails) > 0) {
-                    $docid = $this->Document->find('first', array('conditions' => array('originalname' => $current_name)
-                        , 'fields' => array('id')));
+
+            if (file_exists(Configure::read('upload_location_url') . $current_name)) {
+
+                $document_check_in_db = $this->Document->find('count', array('conditions' => array('originalname' => $current_name)));
+
+                if ($document_check_in_db === 0) {
 
                     /*
-                     * Checking if any of the emails goven in signatory is invalid or not.
-                     * If anyone is invalid it does means that user is tampering so we should put him in risky category.
+                     * Saving document data . In document table "originalname" refers to the name
+                     * by ehich file is stored in the storage area
+                     * and "name" refers to the name given by user.
                      */
-                    foreach ($emails as $email):
-                        if (!Validation::email($email)) {
-                            throw new NotFoundException(__('Error while saving data.'));
-                        }
-                    endforeach;
+                    $this->Document->create();
+                    $this->Document->set('name', $change_to_name);
+                    $this->Document->set('size', $size);
+                    $this->Document->set('type', $type);
+                    $this->Document->set('originalname', $current_name);
+                    $this->Document->set('ownerid', CakeSession::read("Auth.User.id"));
+                    $this->Document->set('status', "0");
 
-                    $this->loadModel('Col');
-                    $this->loadModel('User');
+                    if ($this->Document->save()) {
 
-                    foreach ($emails as $email):
                         /*
-                         * Finding user related to the email.
+                         * Checking if any signatories are there or not.
                          */
-                        $userdata = $this->User->find('first', array('conditions' => array('username' => $email)));
-                        /*
-                         * Saving corresponding data in cols table.
-                         */
-                        $this->Col->create();
-                        $this->Col->set('did', $docid['Document']['id']);
-                        /*
-                          Change status here to default status
-                         */
-                        $this->Col->set('status', Configure::read('doc_pending'));
-                        $token = $this->generate_token($email, $userdata['User']['name']);
-                        $this->Col->set('token', $token);
-                        $this->Col->set('uid', $userdata['User']['id']);
-                        if ($this->Col->save()) {
+
+                        if (count($emails) > 0) {
+                            $docid = $this->Document->find('first', array('conditions' => array('originalname' => $current_name)
+                                , 'fields' => array('id')));
+
                             /*
-                              Send email to the saved collabarator
+                             * Checking if any of the emails goven in signatory is invalid or not.
+                             * If anyone is invalid it does means that user is tampering so we should put him in risky category.
                              */
-                            $document_signing_link = Router::url(array('controller' => 'documents',
-                                        'action' => 'sign',
-                                        "?" => [
-                                            "userid" => $userdata['User']['id']
-                                            , "token" => $token
-                                            , "docuid" => $docid['Document']['id']])
-                                            , true);
-                            $this->sendemail('sign_document_request', 'notification_email_layout', $userdata, $document_signing_link, 'Document Signing Request');
-                        } else {
-                            echo '{"finaldocstatus":false,"error":2}';
+
+                            foreach ($emails as $email):
+                                if (!Validation::email($email)) {
+                                    throw new NotFoundException(__('Error while saving data.'));
+                                }
+                            endforeach;
+
+                            $this->loadModel('Company');
+                            $this->loadModel('Compmember');
+
+                            /*
+                             * $companies will have the name of companies that the user has requested to be a collabarator.
+                             * 
+                             * $company_info_from_db will contain the information of company fetched from company tables. It will store
+                             * data in form of key value pair . Key would be company name and value would be company info fetched.
+                             * 
+                             * $company_member_info_from_db will contain the information of all the signatories of the companies.
+                             * Information will be stored as key value. Key = Comoany Name , Value = Signatories.
+                             *  
+                             */
+                            $companies = [];
+                            $company_info_from_db = [];
+                            $company_member_info_from_db = [];
+
+                            $status = array();
+                            array_push($status, array('status' => Configure::read('legal_head')));
+                            array_push($status, array('status' => Configure::read('auth_sign')));
+                            foreach ($companies_info as $email => $company):
+                                if (!in_array($company, $companies)) {
+                                    $comp_info = $this->Company->find('first', array('conditions' => array('name' => $company)));
+                                    if (isset($comp_info) && $comp_info != '') {
+                                        array_push($companies, $company);
+                                        $company_info_from_db[$company] = $comp_info;
+                                        $company_member_info_from_db[$company] = $this->Compmember->find('all', array('conditions' => array('cid' => $comp_info['Company']['id'], '$or' => $status)));
+                                    } else {
+                                        throw new NotFoundException(__('Error while saving data.'));
+                                    }
+                                }
+                            endforeach;
+
+                            $this->log($company_info_from_db);
+                            $this->log($company_member_info_from_db);
+                            $this->loadModel('Col');
+                            $this->loadModel('User');
+
+
+                            foreach ($emails as $email):
+                                /*
+                                 * Flags for distinguishing when user is not signing on any companys behalf 
+                                 * and when user is signing on some comopany behalf than he is authorised or not.
+                                 */
+                                $flag_for_not_sending_email_to_legal_head = 0;
+                                $flag_when_company_is_not_added = 1;
+
+                                /*
+                                 * Finding user related to the email.
+                                 */
+
+                                $userdata = $this->User->find('first', array('conditions' => array('username' => $email)));
+
+                                /*
+                                 * Checking if collabarator is requested to sign on some company's behalf.
+                                 */
+                                if (isset($companies_info[$email]) && $companies_info[$email] !== '') {
+
+                                    $flag_for_not_sending_email_to_legal_head = 0;
+                                    $flag_when_company_is_not_added = 0;
+                                    $comp_members = $company_member_info_from_db[$companies_info[$email]];
+
+                                    /*
+                                     * Checking for the condition when email is found in company members list and that email
+                                     * is authorised signatory or legal head.
+                                     */
+                                    foreach ($comp_members as $comp_member) {
+
+                                        /*
+                                         * If current user is authorised signatory or legal head.
+                                         */
+                                        if ($comp_member['Compmember']['uid'] === $userdata['User']['id'] &&
+                                                ($comp_member['Compmember']['status'] === Configure::read('auth_sign') || $comp_member['Compmember']['status'] === Configure::read('legal_head'))) {
+                                            $flag_for_not_sending_email_to_legal_head = 1;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                /*
+                                 * Add this unauthorised user as unauthorised signatory under company members table if he is not present 
+                                 * as unauthorised user before. 
+                                 */
+
+                                if ($flag_when_company_is_not_added === 0 && $flag_for_not_sending_email_to_legal_head == 0) {
+                                    $previously_present_check = $this->Compmember->find('count', array('conditions' => array('cid' => $company_info_from_db[$companies_info[$email]]['Company']['id'], 'uid' => $userdata['User']['id'], 'status' => Configure::read('unauth_sign'))));
+
+                                    if ($previously_present_check === 0) {
+                                        $this->Compmember->create();
+                                        $this->Compmember->set('cid', $company_info_from_db[$companies_info[$email]]['Company']['id']);
+                                        $this->Compmember->set('uid', $userdata['User']['id']);
+                                        $this->Compmember->set('status', Configure::read('unauth_sign'));
+                                        $this->Compmember->save();
+                                    }
+                                }
+
+                                /*
+                                 * Saving corresponding data in cols table.
+                                 */
+
+                                $this->Col->create();
+                                $this->Col->set('did', $docid['Document']['id']);
+
+                                /*
+                                  Change status here to default status
+                                 */
+                                $this->Col->set('status', Configure::read('doc_pending'));
+                                $token = $this->generate_token($email, $userdata['User']['name']);
+                                $this->Col->set('token', $token);
+                                $this->Col->set('uid', $userdata['User']['id']);
+
+                                /*
+                                 * Saving the company id in collabaratotrs when authorised signatory is on behalf of some company.
+                                 */
+                                if ($flag_when_company_is_not_added === 0) {
+                                    $this->Col->set('cid', $company_info_from_db[$companies_info[$email]]['Company']['id']);
+                                }
+
+                                if ($this->Col->save()) {
+                                    if ($flag_for_not_sending_email_to_legal_head === 1 || $flag_when_company_is_not_added === 1) {
+                                        /*
+                                          Send email to the saved collabarator
+                                         */
+
+                                        $document_signing_link = Router::url(array('controller' => 'documents',
+                                                    'action' => 'sign',
+                                                    "?" => [
+                                                        "userid" => $userdata['User']['id']
+                                                        , "token" => $token
+                                                        , "docuid" => $docid['Document']['id']])
+                                                        , true);
+
+                                        $this->sendemail('sign_document_request', 'notification_email_layout', $userdata, $document_signing_link, 'Document Signing Request');
+                                    } else {
+                                        /*
+                                         * Sending email to legal head(s) to ask permission for this collabarator to sign the document.
+                                         * Add code here to send email to legal head only once.
+                                         */
+                                        $comp_member_info = $company_member_info_from_db[$companies_info[$email]];
+
+                                        foreach ($comp_member_info as $comp_member):
+                                            if ($comp_member['Compmember']['status'] === Configure::read('legal_head')) {
+                                                $user_info = $this->User->find('first', array('conditions' => array('id' => $comp_member['Compmember']['uid'])));
+                                                $title = 'Permission for Signing';
+                                                $link = Router::url(array('controller' => 'compmember', 'action' => 'authorise_user', $company_info_from_db[$companies_info[$email]]['Company']['id']), true);
+                                                $subject = 'Authorising user for document signing';
+                                                $content = $userdata['User']['name'] . " has requested to sign on your company behalf.Click on below button to authorise "
+                                                        . "users for signing the document.";
+                                                $button_text = 'Authorize users';
+                                                $this->send_general_email($user_info, $link, $title, $content, $subject, $button_text);
+                                            }
+                                        endforeach;
+
+                                        /*
+                                         * Sending mail to the collabarator with the signing link which would only be valid if he becomes 
+                                         * authorized signatory in future.
+                                         */
+                                        $title = 'Document Signing Request';
+                                        $link = Router::url(array('controller' => 'documents',
+                                                    'action' => 'sign',
+                                                    "?" => [
+                                                        "userid" => $userdata['User']['id']
+                                                        , "token" => $token
+                                                        , "docuid" => $docid['Document']['id']])
+                                                        , true);
+                                        $subject = 'Authoirzed Signatory granting request';
+                                        $content = $owner_data['User']['name'] . " has requested for you to sign on " . $company_info_from_db[$companies_info[$email]]['Company']['name'] . " behalf.Wait for your authorisation from that "
+                                                . "company.Click below button to send email again to company legal head for granting access.";
+                                        $button_text = "Sign Document";
+                                        $this->send_general_email($userdata, $link, $title, $content, $subject, $button_text);
+                                    }
+                                } else {
+                                    echo '{"finaldocstatus":false,"error":2}';
+                                }
+
+                            endforeach;
+
+                            echo '{"finaldocstatus":true}';
+                            $this->Session->setFlash(__('Document uploaded suceessfully and mails sent to all signatories'), 'flash_success');
+                            exit;
                         }
-                    endforeach;
-                    echo '{"finaldocstatus":true}';
-                    $this->Session->setFlash(__('Document uploaded suceessfully and mails sent to all signatories'), 'flash_success');
+                        /*
+                         * Case when no signatories are present.
+                         */
+                        echo '{"finaldocstatus":false,"error":1}';
+                        exit;
+                    }
+                    /*
+                     * Case when document data can't be saved into the table.
+                     */
+                    echo '{"finaldocstatus":false,"error":2}';
                     exit;
                 }
                 /*
-                 * Case when no signatories are present.
+                 * Case when document already exists in database.
                  */
-                echo '{"finaldocstatus":false,"error":1}';
+                echo '{"finaldocstatus":false,"error":2}';
                 exit;
             }
             /*
-             * Case when document data can't be saved into the table.
+             * Case when document is not present in saved location.
              */
             echo '{"finaldocstatus":false,"error":2}';
             exit;
         }
     }
 
+    /*
+     * It will move the uploaded file in saving location and will return the data
+     * which would be sent to upload method.
+     */
+
     public function upload_ajax() {
         $this->request->onlyAllow('ajax');
         $this->autorender = false;
         $this->layout = false;
-        $allowed = array('doc', 'pdf', 'docx');
-        $this->log($_FILES);
-        if (isset($_FILES['data']['name']['Document']['file']) && $_FILES['data']['error']['Document']['file'] == 0) {
 
-            $extension = pathinfo($_FILES['data']['name']['Document']['file'], PATHINFO_EXTENSION);
+        /*
+         * Getting headers of the request to check the url referer
+         * Referer should be /documents/
+         * upload
+         */
+        $headers = getallheaders();
 
-            if (!in_array(strtolower($extension), $allowed)) {
-                echo '{"documentstatus" : false , "error": -1}';
-                exit;
+        /*
+         * Checking if url referrer matches
+         */
+        if ($headers['Referer'] === Router::url(array('controller' => 'documents', 'action' => 'upload'), true)) {
+
+            $allowed = array('doc', 'pdf', 'docx');
+            if (isset($_FILES['data']['name']['Document']['file']) && $_FILES['data']['error']['Document']['file'] == 0) {
+
+                $extension = pathinfo($_FILES['data']['name']['Document']['file'], PATHINFO_EXTENSION);
+
+                if (!in_array(strtolower($extension), $allowed)) {
+                    echo '{"documentstatus" : false , "error": -1}';
+                    exit;
+                }
+
+                /*
+                 * get_temporary_document_name is defined in AppController.php
+                 */
+                $temporary_document_name = $this->get_temporary_document_name();
+                $temporary_document_name = $temporary_document_name . "." . $extension;
+
+                /*
+                 * Saving document so that document doesn't gets
+                 * lost from the temporary files.
+                 */
+                if (move_uploaded_file($_FILES['data']['tmp_name']['Document']['file'], Configure::read('upload_location_url') . $temporary_document_name)) {
+
+                    //echo $file;
+                    echo '{"documentstatus" : true '
+                    . ',"documentname" : "' . $temporary_document_name . '"'
+                    . ',"documentsize":' . $_FILES['data']['size']['Document']['file'] . ''
+                    . ',"documentoriginalname":"' . $_FILES['data']['name']['Document']['file'] . '"'
+                    . ',"documenttype":"' . $_FILES['data']['type']['Document']['file'] . '"}';
+                    exit;
+                }
+                echo '{"documentstatus" : false , "error":' . $_FILES['data']['error']['Document']['file'] . '}';
             }
-
-            /*
-             * get_temporary_document_name is defined in AppController.php
-             */
-            $temporary_document_name = $this->get_temporary_document_name();
-            $temporary_document_name = $temporary_document_name . "." . $extension;
-
-            /*
-             * Saving document so that document doesn't gets
-             * lost from the temporary files.
-             */
-            if (move_uploaded_file($_FILES['data']['tmp_name']['Document']['file'], '/home/ubuntu/uploads/' . $temporary_document_name)) {
-
-                //echo $file;
-                echo '{"documentstatus" : true '
-                . ',"documentname" : "' . $temporary_document_name . '"'
-                . ',"documentsize":' . $_FILES['data']['size']['Document']['file'] . ''
-                . ',"documentoriginalname":"' . $_FILES['data']['name']['Document']['file'] . '"'
-                . ',"documenttype":"' . $_FILES['data']['type']['Document']['file'] . '"}';
-                exit;
-            }
-            echo '{"documentstatus" : false , "error":' . $_FILES['data']['error']['Document']['file'] . '}';
+            echo '{"documentstatus" : false }';
         }
         echo '{"documentstatus" : false }';
     }
@@ -262,12 +492,34 @@ class DocumentsController extends AppController {
                     'uid' => $userid,
                     'token' => $token,
                     'did' => $docuid
-                ),
-                'fields' => array('id', 'status')
+                )
             );
             $coldata = $this->Col->find('first', $parameters);
 
+            /*
+             * Add code here is the user is unauthorised signatory of the comopany
+             */
             if ($coldata) {
+                /*
+                 * If user id signing on behalf of company
+                 */
+                if (isset($coldata['Col']['cid'])) {
+                    /*
+                     * Checking if user is authorized to sign or not.
+                     */
+                    $this->loadModel('Compmember');
+                    $authorized_check = $this->Compmember->find('count', array('conditions' => array('cid' => $coldata['Col']['cid'], 'uid' => CakeSession::read('Auth.User.id'), 'status' => Configure::read('auth_sign'))));
+                    $this->loadModel('Company');
+                    $company_info = $this->Company->find('first', array('conditions' => array('id' => $coldata['Col']['cid'])));
+                    $this->set('company_info', $company_info);
+                    if ($authorized_check === 0) {
+                        $this->set('unauthorized', true);
+                        $this->render();
+                    } else {
+                        $this->set('document', $this->Document->findById($docuid));
+                        $this->render();
+                    }
+                }
                 /*
                   If all the variables are correct show the document to the user and render the view
                  */
@@ -768,8 +1020,8 @@ class DocumentsController extends AppController {
             $extension = $this->params['url']['type'];
             /*
              * status would be set to temp if document is needed to be viewed while uploading.
-             * 
-             * One bug is there that when document doesnt gets saved into database but remains saved 
+             *
+             * One bug is there that when document doesnt gets saved into database but remains saved
              * in our location anyone can view that document by setting status variable to temp.
              */
             if (isset($this->params['url']['status']) && $this->params['url']['status'] === 'temp') {
@@ -782,21 +1034,21 @@ class DocumentsController extends AppController {
         } else {
             throw new NotFoundException(__('Invalid URL'));
         }
-        
+
         /*
          * Change this url according to the location where document is getting saved.
          */
-        $docurl = '/home/ubuntu/uploads/' . $docname . '.' . $extension;
+        $docurl = Configure::read('upload_location_url') . $docname . '.' . $extension;
         $file_check = file_exists($docurl);
 
         if (!$file_check) {
             throw new NotFoundException(__('Invalid URL'));
         }
         $colids = [];
-        
+
         $this->loadModel('Col');
         /*
-         * Finding info about the document 
+         * Finding info about the document
          */
         $docinfo = $this->Document->find('first', array('conditions' => array('originalname' => $docname . '.' . $extension)));
         /*
@@ -804,7 +1056,7 @@ class DocumentsController extends AppController {
          */
         if (isset($docinfo) && sizeof($docinfo) > 0) {
             /*
-             * If any info related to the doc is find out unset the nochecking flag even if the 
+             * If any info related to the doc is find out unset the nochecking flag even if the
              * status is set temp.
              * Temp status would work only when document doesnt gets saved in database.
              */
@@ -820,20 +1072,33 @@ class DocumentsController extends AppController {
              * FIrst pushing ownerid into colids.
              */
             array_push($colids, $docinfo['Document']['ownerid']);
-
             foreach ($cols as $col):
-                array_push($colids, $col['Col']['uid']);
+                if (isset($col['Col']['cid'])) {
+                    /*
+                     * Checking if user is authorized to sign or not on behalf of company.
+                     */
+                    $this->loadModel('Compmember');
+                    $status = array();
+                    array_push($status, array('status' => Configure::read('legal_head')));
+                    array_push($status, array('status' => Configure::read('auth_sign')));
+                    $authorized_check = $this->Compmember->find('count', array('conditions' => array('cid' => $col['Col']['cid'], 'uid' => $col['Col']['uid'], '$or' => $status)));
+                    if ($authorized_check != 0) {
+                        array_push($colids, $col['Col']['uid']);
+                    }
+                } else {
+                    array_push($colids, $col['Col']['uid']);
+                }
             endforeach;
         }
         /*
-         * If userid of current logged in user falls in colids array or the request is having temp 
+         * If userid of current logged in user falls in colids array or the request is having temp
          * status than show the doc to user else show 404 error.
          */
         if (in_array(CakeSession::read('Auth.User.id'), $colids) || $nochecking_flag === 1) {
 
             if (strtolower($extension) === 'pdf') {
                 header('Content-Type: application/pdf');
-            } elseif (strtolower($extension) === 'doc' || strtolower($extension)=== 'docx') {
+            } elseif (strtolower($extension) === 'doc' || strtolower($extension) === 'docx') {
                 header('Content-Type: application/doc');
             }
 
@@ -843,12 +1108,13 @@ class DocumentsController extends AppController {
             throw new NotFoundException(__('Invalid URL'));
         }
     }
-    
+
     /*
      * To download the document .
      * Only available to document owners and collabarators .
      * No temp status available.
      */
+
     public function download() {
         /*
          * Same code as preview .
@@ -856,15 +1122,15 @@ class DocumentsController extends AppController {
          * Also one extra header is addded to download the document directly.
          */
         $this->layout = false;
-        
+
         if (isset($this->params['url']['name']) && isset($this->params['url']['type'])) {
             $docname = $this->params['url']['name'];
             $extension = $this->params['url']['type'];
         } else {
             throw new NotFoundException(__('Invalid URL'));
         }
-        
-        $docurl = '/home/ubuntu/uploads/' . $docname . '.' . $extension;
+
+        $docurl = Configure::read('upload_location_url') . $docname . '.' . $extension;
         $file_check = file_exists($docurl);
 
         if (!$file_check) {
@@ -873,34 +1139,46 @@ class DocumentsController extends AppController {
 
         $this->loadModel('Col');
         /*
-         * Finding info about the document 
+         * Finding info about the document
          */
         $docinfo = $this->Document->find('first', array('conditions' => array('originalname' => $docname . '.' . $extension)));
 
         if (isset($docinfo) && sizeof($docinfo) > 0) {
-            
+
             $cols = $this->Col->find('all', array('conditions' => array('did' => $docinfo['Document']['id'])));
-            
+
             $colids = [];
             array_push($colids, $docinfo['Document']['ownerid']);
-            
+
             foreach ($cols as $col):
-                array_push($colids, $col['Col']['uid']);
+                if (isset($col['Col']['cid'])) {
+                    /*
+                     * Checking if user is authorized to sign or not on behalf of company.
+                     */
+                    $this->loadModel('Compmember');
+                    $status = array();
+                    array_push($status, array('status' => Configure::read('legal_head')));
+                    array_push($status, array('status' => Configure::read('auth_sign')));
+                    $authorized_check = $this->Compmember->find('count', array('conditions' => array('cid' => $col['Col']['cid'], 'uid' => $col['Col']['uid'], '$or' => $status)));
+                    if ($authorized_check != 0) {
+                        array_push($colids, $col['Col']['uid']);
+                    }
+                } else {
+                    array_push($colids, $col['Col']['uid']);
+                }
             endforeach;
-        }
-        else {
+        } else {
             throw new NotFoundException(__('Invalid URL'));
         }
-        
+
         if (in_array(CakeSession::read('Auth.User.id'), $colids)) {
 
             if (strtolower($extension) === 'pdf') {
-                
+
                 header('Content-Type: application/pdf');
                 header("Content-Disposition:attachment;filename='" . $docinfo['Document']['name'] . "_from_verysure." . $extension . "'");
-                
-            } elseif (strtolower($extension) === 'doc' || strtolower($extension)=== 'docx' ) {
-                
+            } elseif (strtolower($extension) === 'doc' || strtolower($extension) === 'docx') {
+
                 header('Content-Type: application/doc');
                 header("Content-Disposition:attachment;filename='" . $docinfo['Document']['name'] . "_from_verysure." . $extension . "'");
             }

@@ -27,7 +27,7 @@ class UsersController extends AppController {
          */
         if ($this->request->is('post')) {
             if ($this->Auth->login()) {
-                return $this->redirect(array('controller' => 'dashboard', 'action' => 'index'));
+                return $this->redirect($this->Auth->redirectUrl());
             } else {
                 $this->Session->setFlash(__('Please check entered details.'), 'flash_error');
             }
@@ -53,30 +53,61 @@ class UsersController extends AppController {
 
             if ($this->User->validates()) {
                 if ($this->request->data['renter_password'] === $this->request->data['User']['password']) {
+
                     /*
-                      Generating token which would be used for email verification. It generates shuffled string of
-                      sha 512 hash of -> (sha 256 hash of username(i.e. email) + name )+ current timestamp
-                      + md5 hash of random number
+                     * Checking if company name is set
                      */
-                    $token = str_shuffle(hash('sha512', (hash('sha256', $this->request->data['User']['username']
-                                            . $this->request->data['User']['name'])) . strval(time()) . md5(rand())));
+                    if (isset($this->request->data['User']['companyname'])) {
+                        $this->loadModel('Company');
+                        $this->Company->set('name', $this->request->data['User']['companyname']);
+                        if ($this->Company->validates()) {
+                            $check_percentage = $this->company_name_from_email_check($this->request->data['User']['username'], $this->request->data['User']['companyname']);
+
+                            /*
+                             * Change this parameter in future as current implementation is flawed.
+                             */
+                            if ($check_percentage >= 70) {
+                                $this->Company->save();
+                            } else {
+                                $this->set('companymatcherror', true);
+                                exit;
+                            }
+                        }
+                    }
+                    /*
+                     * Generating token which would be used for email verification. 
+                     * Written in AppController
+                     */
+                    $token = $this->generate_token($this->request->data['User']['username'], $this->request->data['User']['name']);
                     $this->request->data['User']['token'] = $token;
 
                     if ($this->User->save($this->request->data)) {
-                        /*
-                          Send verification email
-                         */
-                        $email_verification_link = Router::url(array('controller' => 'users',
-                        'action' => 'verify',
-                        '?' => [
-                        'username' => $this->request->data['User']['username'], 'token' => $this->request->data['User']['token'],], ), true);
-                        $this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
-                        /*
-                          Enter code here for case when email sending is failed.
-                         */
-                        $this->Session->setFlash(__('Signup successfull.Please check your mailbox for verification mail(Dont forget to check SPAM also).'), 'flash_success');
+                        
+                        $this->loadModel('Compmember');
+                        $company_data = $this->Company->find('first', array('conditions' => array('name' => $this->request->data['User']['companyname'])));
+                        $this->Compmember->create();
+                        $this->Compmember->set('cid', $company_data['Company']['id']);
+                        $userdata = $this->User->find('first', array('conditions' => array('username' => $this->request->data['User']['username'])));
+                        $this->Compmember->set('uid', $userdata['User']['id']);
+                        $this->Compmember->set('status',Configure::read('legal_head'));
+                        if ($this->Compmember->save()) {
+                            /*
+                              Send verification email
+                             */
+                            $email_verification_link = Router::url(array('controller' => 'users',
+                                        'action' => 'verify',
+                                        '?' => [
+                                            'username' => $this->request->data['User']['username'], 'token' => $this->request->data['User']['token'],],), true);
+                            $this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
+                            /*
+                              Enter code here for case when email sending is failed.
+                             */
+                            $this->Session->setFlash(__('Signup successfull.Please check your mailbox for verification mail(Dont forget to check SPAM also).'), 'flash_success');
 
-                        return $this->redirect(array('action' => 'login'));
+                            return $this->redirect(array('action' => 'login'));
+                        } else {
+                            $this->Session->setFlash("Can't save data right now.Please try again later.", 'flash_error');
+                        }
                     } else {
                         $this->Session->setFlash("Can't save data right now.Please try again later.", 'flash_error');
                     }
@@ -99,7 +130,7 @@ class UsersController extends AppController {
 
         if ($this->request->is('post')) {
             if ($this->Auth->login()) {
-                return $this->redirect(array('controller' => 'dashboard', 'action' => 'index'));
+                return $this->redirect($this->Auth->redirectUrl());
             } else {
                 $this->Session->setFlash(__('Please check entered details.'), 'flash_error');
             }
@@ -171,7 +202,8 @@ class UsersController extends AppController {
             if (!$this->User->exists()) {
                 throw new NotFoundException(__('Invalid URL'));
             }
-            $this->request->data['User']['verified'] = Configure::read('user_verified');;
+            $this->request->data['User']['verified'] = Configure::read('user_verified');
+            ;
             /*
               Changing token so that link sent to user is no longer valid
              */
@@ -181,7 +213,7 @@ class UsersController extends AppController {
                 /*
                   Sending welcome email to the user after user signs up.
                  */
-                $this->sendemail('signup-welcome', 'notification_email_layout',$userid, '', 'Welcome to VerySure');
+                $this->sendemail('signup-welcome', 'notification_email_layout', $userid, '', 'Welcome to VerySure');
                 $this->Session->setFlash(__('Congrats you have been verified.Now you can sigin to access our great site.'), 'flash_success');
 
 
