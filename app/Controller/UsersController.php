@@ -60,19 +60,7 @@ class UsersController extends AppController {
                     if (isset($this->request->data['User']['companyname'])) {
                         $this->loadModel('Company');
                         $this->Company->set('name', $this->request->data['User']['companyname']);
-                        if ($this->Company->validates()) {
-                            $check_percentage = $this->company_name_from_email_check($this->request->data['User']['username'], $this->request->data['User']['companyname']);
-
-                            /*
-                             * Change this parameter in future as current implementation is flawed.
-                             */
-                            if ($check_percentage >= 70) {
-                                $this->Company->save();
-                            } else {
-                                $this->set('companymatcherror', true);
-                                exit;
-                            }
-                        }
+                        $this->Company->save();
                     }
                     /*
                      * Generating token which would be used for email verification. 
