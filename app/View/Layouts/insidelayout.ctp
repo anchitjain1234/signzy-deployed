@@ -65,5 +65,4 @@
       <p class="text-center">&copy; VerySure™ 2014</p>
     </footer>
   </body>
-  <?php echo $this->element('sql_dump'); ?>
 </html>
