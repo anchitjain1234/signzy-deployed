@@ -3,17 +3,27 @@
     <?php
     if (isset($unauthorized) && $unauthorized) {
         ?>
+        <div id="alertdiv"></div>
         <div class="row">
-            <h1>You are not authorized to sign on <?php echo $company_info['Company']['name'] ?>'s behalf.</h1>
-            <h4>Click here to resend emails to legal heads to make you authorized signatory.</h4>
+            <h1 class="compid" id="<?php echo $company_info['Company']['id']; ?>">You are not authorized to sign on <?php echo $company_info['Company']['name'] ?>'s behalf.</h1>
+            <h4 class="userid" id="<?php echo $userid; ?>">Click <a href="#" id="remind_heads">here</a> to resend emails to legal heads to make you authorized signatory.</h4>
         </div>
     </div>
+
+    <?php
+    echo $this->Html->script('jquery-1.11.1.min.js');
+    echo $this->Html->script('bootstrap.min.js');
+    echo $this->Html->script('signunauthorized.js');
+    ?>
+
     <?php
 } else {
     ?>
     <div class="row">
         <div class="col-md-12">
-            <h3>Please Review and act on the document<?php if(isset($company_info)){echo " on behalf of <b><u>".$company_info['Company']['name']."</u></b>";} ?></h3>
+            <h3>Please Review and act on the document<?php if (isset($company_info)) {
+        echo " on behalf of <b><u>" . $company_info['Company']['name'] . "</u></b>";
+    } ?></h3>
         </div>
     </div>
 
@@ -21,14 +31,15 @@
         <div class="col-md-1"><?php echo $this->Html->image('profile_new.png', array('alt' => 'Document')); ?></div>
         <div class="col-md-3"><h5><?php echo $name ?></h5><h5>Your Affiliated Company</h5><h6></h6></div>
         <div class="col-md-8 text-right">
-    <?php
-    $name_seperated = explode(".", $document['Document']['originalname']);
-    $name_front = "";
-    for ($i = 0; $i < count($name_seperated) - 1; $i++) {
-        $name_front .= $name_seperated[$i];
-    }
-    ?>
-            <?php $link = Router::url('/', true) . "documents/preview?name=" . $name_front . "&type=" . $name_seperated[count($name_seperated) - 1];
+            <?php
+            $name_seperated = explode(".", $document['Document']['originalname']);
+            $name_front = "";
+            for ($i = 0; $i < count($name_seperated) - 1; $i++) {
+                $name_front .= $name_seperated[$i];
+            }
+            ?>
+            <?php
+            $link = Router::url('/', true) . "documents/preview?name=" . $name_front . "&type=" . $name_seperated[count($name_seperated) - 1];
             $download_link = Router::url('/', true) . "documents/download?name=" . $name_front . "&type=" . $name_seperated[count($name_seperated) - 1];
             ?>
             <a href="<?php echo $download_link; ?>">Download</a> | <?php echo $this->Html->link('Trail', array('controller' => 'documents', 'action' => 'trail', $document['Document']['id'])); ?>
@@ -37,18 +48,18 @@
 
     <div class="row top-buffer">
         <div class="col-md-12 bg-highlight" style="height:400px;">
-    <?php
-    if (isset($document)) {
+            <?php
+            if (isset($document)) {
 
-        echo "<iframe src='" . $link . "' width = '1100' height = '380'></iframe>";
-    } else {
-        echo "<div class=\"container\" >
+                echo "<iframe src='" . $link . "' width = '1100' height = '380'></iframe>";
+            } else {
+                echo "<div class=\"container\" >
                   <div class=\"row align-center\">
                     Document to be signed will appear here.
                   </div>
                 </div>";
-    }
-    ?>
+            }
+            ?>
         </div>
     </div>
 

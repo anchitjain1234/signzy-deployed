@@ -27,7 +27,8 @@
                                                                           'id' => 'usercompanyname', 'label' => false, 'autocomplete' => "off" ,
                                                                           'required' => 'required',"type"=>'hidden'));
                             ?>
-                            <div class="error-message"> <?php if (isset($companymatcherror) && $companymatcherror) echo "Please make sure company name is same as email domain."; ?></div>
+                            <div class="error-message"> <?php if (isset($companymatcherror) && $companymatcherror) echo "Please make sure company name is same as email domain."; 
+                                                              if (isset($companyuniquerror) && $companyuniquerror) echo $uniquerrorcontent; ?></div>
                             <i id="name-glyph" class="glyphicon glyphicon-user form-control-feedback"></i>
                         </div>
                     </div>
