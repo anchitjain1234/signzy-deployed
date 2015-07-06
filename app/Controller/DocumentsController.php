@@ -112,13 +112,22 @@ class DocumentsController extends AppController {
             $this->request->onlyAllow('ajax');
             $this->autorender = false;
             $this->layout = false;
-
-            $emails = json_decode($this->request->data['emails']);
-            $companies_info = $this->request->data['company_info'];
-            $biometric_info = json_decode($this->request->data['biometric_info']);
-
-            $this->log($companies_info);
-            $this->log($biometric_info);
+            
+            if(isset($this->request->data['emails']))
+            {
+                $emails = json_decode($this->request->data['emails']);
+            }
+            
+            if(isset($this->request->data['company_info']))
+            {
+                $companies_info = $this->request->data['company_info'];
+            }
+            
+            if(isset($this->request->data['biometric_info']))
+            {
+                $biometric_info = json_decode($this->request->data['biometric_info']);
+            }
+            
 
             $current_name = $this->request->data['doc_name'];
 
@@ -167,8 +176,7 @@ class DocumentsController extends AppController {
                          */
 
                         if (count($emails) > 0) {
-                            $docid = $this->Document->find('first', array('conditions' => array('originalname' => $current_name)
-                                , 'fields' => array('id')));
+                            $docid = $this->Document->find('first', array('conditions' => array('originalname' => $current_name)));
 
                             /*
                              * Checking if any of the emails goven in signatory is invalid or not.
@@ -201,7 +209,10 @@ class DocumentsController extends AppController {
                             $status = array();
                             array_push($status, array('status' => Configure::read('legal_head')));
                             array_push($status, array('status' => Configure::read('auth_sign')));
-                            foreach ($companies_info as $email => $company):
+                            
+                            if(isset($companies_info))
+                            {
+                               foreach ($companies_info as $email => $company):
                                 if (!in_array($company, $companies)) {
                                     $comp_info = $this->Company->find('first', array('conditions' => array('name' => $company)));
                                     if (isset($comp_info) && $comp_info != '') {
@@ -212,7 +223,9 @@ class DocumentsController extends AppController {
                                         throw new NotFoundException(__('Error while saving data.'));
                                     }
                                 }
-                            endforeach;
+                            endforeach; 
+                            }
+                            
 
                             $this->log($company_info_from_db);
                             $this->log($company_member_info_from_db);
@@ -266,9 +279,30 @@ class DocumentsController extends AppController {
                                  */
 
                                 if ($flag_when_company_is_not_added === 0 && $flag_for_not_sending_email_to_legal_head == 0) {
-                                    $previously_present_check = $this->Compmember->find('count', array('conditions' => array('cid' => $company_info_from_db[$companies_info[$email]]['Company']['id'], 'uid' => $userdata['User']['id'], 'status' => Configure::read('unauth_sign'))));
-
-                                    if ($previously_present_check === 0) {
+                                    $previously_present_check = $this->Compmember->find('first', array('conditions' => array('cid' => $company_info_from_db[$companies_info[$email]]['Company']['id'], 'uid' => $userdata['User']['id'])));
+                                    $this->log('Entering in flags.');
+                                    $this->log('$previously_present_check');
+                                    $this->log($previously_present_check);
+                                    /*
+                                     * If this collabarator is already present as rejected signatory in Compmember than send the email to the 
+                                     * document owner that this signatory is already rejected from the legal heads of the company.
+                                     */
+                                    if (count($previously_present_check)!=0 && ($previously_present_check['Compmember']['status'] === Configure::read('rejected_sign'))) {
+                                        $link = Router::url(array('controller' => 'documents', 'action' => 'edit', $company_info_from_db[$companies_info[$email]]['Company']['id']), true);
+                                        $title = 'Signatory rejected';
+                                        $subject = $userdata['User']['name'] . ' has been rejected from signining on ' . $company_info_from_db[$companies_info[$email]]['Company']['name'] . '\'s behalf';
+                                        $content = 'Unfortunately ' . $userdata['User']['name'] . 'whom you added as an authorized signatory'
+                                                . 'for ' . $docid['Document']['name'] . ' on behalf of ' . $company_info_from_db[$companies_info[$email]]['Company']['name']
+                                                . ' has been rejected by the company legal head(s).Please click the below button to edit your signatories and remove'
+                                                . 'the rejected signatories.';
+                                        $button_text = 'Edit signatories';
+                                        $this->send_general_email($owner_data, $link, $title, $content, $subject, $button_text);
+                                        continue;
+                                    }
+                                    /*
+                                     * If nothing is found linked with this company and user than add add the user as
+                                     * unauthorized signatory.
+                                     */ elseif (count($previously_present_check) === 0) {
                                         $this->Compmember->create();
                                         $this->Compmember->set('cid', $company_info_from_db[$companies_info[$email]]['Company']['id']);
                                         $this->Compmember->set('uid', $userdata['User']['id']);
@@ -326,8 +360,8 @@ class DocumentsController extends AppController {
                                                 $user_info = $this->User->find('first', array('conditions' => array('id' => $comp_member['Compmember']['uid'])));
                                                 $title = 'Permission for Signing';
                                                 $link = Router::url(array('controller' => 'compmember', 'action' => 'authorise_user', $company_info_from_db[$companies_info[$email]]['Company']['id']), true);
-                                                $subject = 'Authorising '.$userdata['User']['name'].' for document signing';
-                                                $content = $userdata['User']['name'] . " has requested to sign on".$company_info_from_db[$companies_info[$email]]['Company']['name'].".Click on below button to authorise "
+                                                $subject = 'Authorising ' . $userdata['User']['name'] . ' for document signing';
+                                                $content = $userdata['User']['name'] . " has requested to sign on" . $company_info_from_db[$companies_info[$email]]['Company']['name'] . ".Click on below button to authorise "
                                                         . "user for signing the document.";
                                                 $button_text = 'Authorize user';
                                                 $this->send_general_email($user_info, $link, $title, $content, $subject, $button_text);
@@ -346,7 +380,7 @@ class DocumentsController extends AppController {
                                                         , "token" => $token
                                                         , "docuid" => $docid['Document']['id']])
                                                         , true);
-                                        $subject = 'Authoirzed Signatory for '.$company_info_from_db[$companies_info[$email]]['Company']['name'];
+                                        $subject = 'Authoirzed Signatory for ' . $company_info_from_db[$companies_info[$email]]['Company']['name'];
                                         $content = $owner_data['User']['name'] . " has requested for you to sign on " . $company_info_from_db[$companies_info[$email]]['Company']['name'] . " behalf.Wait for your authorisation from that "
                                                 . "company.Click below button to send email again to company legal head for granting access.";
                                         $button_text = "Sign Document";
