@@ -346,7 +346,7 @@ class DocumentsController extends AppController {
                                                         , "token" => $token
                                                         , "docuid" => $docid['Document']['id']])
                                                         , true);
-                                        $subject = 'Authoirzed Signatory granting request';
+                                        $subject = 'Authoirzed Signatory for '.$company_info_from_db[$companies_info[$email]]['Company']['name'];
                                         $content = $owner_data['User']['name'] . " has requested for you to sign on " . $company_info_from_db[$companies_info[$email]]['Company']['name'] . " behalf.Wait for your authorisation from that "
                                                 . "company.Click below button to send email again to company legal head for granting access.";
                                         $button_text = "Sign Document";
