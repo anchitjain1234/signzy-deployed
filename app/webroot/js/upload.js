@@ -141,6 +141,23 @@ $(function () {
         $('#biometric_checkbox_div :checkbox:checked').attr('checked', false);
     };
     
+    $.resest_all_fields = function()
+    {
+        $('#email_search').val("");
+        current_comapny_selected = "";
+        $('input[name=company]:checked', '#recent_companies_list').attr('checked', false);
+        $('#biometric_checkbox_div :checkbox:checked').attr('checked', false);
+    };
+    
+    $.clearradiobox = function()
+    {
+        $('input[name=company]', '#recent_companies_list').attr('checked',false);
+    };
+    
+    $('#clearing_radio_box').click(function () {
+        $.clearradiobox();
+    });
+    
     $('#biometric_checkbox_div').on('change',function(){
         if ($('#biometric_checkbox_div :checkbox:checked').length > 0)
         {
@@ -331,6 +348,7 @@ $(function () {
     });
 
     $('#add_button').click($.email_uniqueness_check);
+    $('#add_button').click($.resest_all_fields);
 
     // Prevent the default action when a file is dropped on the window
     $(document).on('drop dragover', function (e) {

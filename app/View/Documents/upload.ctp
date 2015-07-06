@@ -40,7 +40,7 @@
                 <button id="<?php echo $useremail ?>" type="button" class="btn btn-primary signatory_button" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-plus"></span>Add Signatory</button>
             </div>
             <?php
-            echo $this->Form->button('Save', ['type' => 'submit', 'class' => 'btn btn-success btn-block', 'div' => false, 'id' => "senddoc"]);
+            echo $this->Form->button('Send', ['type' => 'submit', 'class' => 'btn btn-success btn-block', 'div' => false, 'id' => "senddoc"]);
             echo $this->Form->end();
             ?>
         </div>
@@ -74,6 +74,7 @@
                                 <div id="company-empty-message"></div>
                                 <button type="button" class="btn btn-default" id="add_company_btn"><span class="glyphicon glyphicon-plus"></span>Add</button>
                                 <button type="button" class="btn btn-danger" id="close_company_add_btn" style="display:none"><span class="glyphicon glyphicon-remove"></span>Close</button>
+                                <button type="button" class="btn btn-default" id="clearing_radio_box">Clear Selection</button>
                             </div>
                         </div>
                         

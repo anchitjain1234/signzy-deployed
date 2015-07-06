@@ -150,8 +150,7 @@ class CompmemberController extends AppController {
                     $this->Compmember->id = $existing_row['Compmember']['id'];
                     $this->Compmember->set('status', Configure::read('rejected_sign'));
                     if ($this->Compmember->save()) {
-                        //Sending Confirmation email to the user that he has been confirmed and now can sign the document with the link provided
-                        //in previous emails.
+                        //Sending email to the user that he has been rejected from signing the documents
                         $userdata = $this->User->find('first', array('conditions' => array('id' => $id)));
                         $link = Router::url(array('controller' => 'dashboard', 'action' => 'index'), true);
                         $subject = 'Authorized signatory for ' . $companyinfo['Company']['name'] . ' declined.';
@@ -159,6 +158,11 @@ class CompmemberController extends AppController {
                         $content = 'Unfortunately legal head of ' . $companyinfo['Company']['name'] . ' declined you for authorized signatory.';
                         $button_text = 'Visit Verysure dashboard';
                         $this->send_general_email($userdata, $link, $title, $content, $subject, $button_text);
+                        
+                        /*
+                         * Add code here to email the document owners where this user was signatory from this company and 
+                         * ask the owners to update the signatories.
+                         */
                     } else {
                         /*
                          * Case when data can not be updated.
@@ -181,7 +185,7 @@ class CompmemberController extends AppController {
              */
 
             /*
-             * Send email to legal heads that some users have been added as authorized signatory.
+             * Send email to legal heads that signatories have been updated.
              */
             $legal_head_ids = $this->Compmember->find('all', array('conditions' => array('cid' => $cid, 'status' => Configure::read('legal_head'))));
             foreach ($legal_head_ids as $legal_head):
@@ -197,7 +201,7 @@ class CompmemberController extends AppController {
                 $this->send_general_email($legal_head_info, $link, $title, $content, $subject, $button_text);
             endforeach;
             echo '{"error":false}';
-            $this->Session->setFlash('Signatories authorized successfully.','flash_success');
+            $this->Session->setFlash('Signatories rejected successfully.','flash_success');
         }
     }
 
