@@ -1129,7 +1129,7 @@ class DocumentsController extends AppController {
             if (strtolower($extension) === 'pdf') {
                 header('Content-Type: application/pdf');
             } elseif (strtolower($extension) === 'doc' || strtolower($extension) === 'docx') {
-                header('Content-Type: application/doc');
+                header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
             }
 
             header("Content-Length: " . filesize($docurl));
