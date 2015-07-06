@@ -30,7 +30,13 @@ class Company extends AppModel {
     );
     
     public function checkname() {
-        return ($this->find('count', array('conditions' => array('name' => $this->data['Company']['name']))) == 0);
+        $count_check = $this->find('count', array('conditions' => array('name' => new MongoRegex('/^'.$this->data['Company']['name'] . "$/i"))));
+        
+        if($count_check === 0)
+        {
+            return true;
+        }
+        return false;
     }
 
 }

@@ -60,24 +60,45 @@ class UsersController extends AppController {
                     if (isset($this->request->data['User']['companyname'])) {
                         $this->loadModel('Company');
                         $this->Company->set('name', $this->request->data['User']['companyname']);
-                        $this->Company->save();
+                        
+                        /*
+                         * If company name entered follows our validation rules or not.
+                         */
+                        if ($this->Company->validates()) {
+                            $check_percentage = $this->company_name_from_email_check($this->request->data['User']['username'], $this->request->data['User']['companyname']);
+
+                            /*
+                             * Change this parameter in future as current implementation is flawed.
+                             */
+                            if ($check_percentage >= 70) {
+                                $this->Company->save();
+                            } else {
+                                $this->set('companymatcherror', true);
+                                return $this->Session->setFlash(__('Please check highlighted fields.'), 'flash_warning');
+                            }
+                        } else {
+                            $errors = $this->Company->validationErrors;
+                            $this->set('companyuniquerror', true);
+                            $this->set('uniquerrorcontent', $errors['name']['0']);
+                            return $this->Session->setFlash(__('Please check highlighted fields.'), 'flash_warning');
+                        }
                     }
                     /*
-                     * Generating token which would be used for email verification. 
+                     * Generating token which would be used for email verification.
                      * Written in AppController
                      */
                     $token = $this->generate_token($this->request->data['User']['username'], $this->request->data['User']['name']);
                     $this->request->data['User']['token'] = $token;
 
                     if ($this->User->save($this->request->data)) {
-                        
+
                         $this->loadModel('Compmember');
                         $company_data = $this->Company->find('first', array('conditions' => array('name' => $this->request->data['User']['companyname'])));
                         $this->Compmember->create();
                         $this->Compmember->set('cid', $company_data['Company']['id']);
                         $userdata = $this->User->find('first', array('conditions' => array('username' => $this->request->data['User']['username'])));
                         $this->Compmember->set('uid', $userdata['User']['id']);
-                        $this->Compmember->set('status',Configure::read('legal_head'));
+                        $this->Compmember->set('status', Configure::read('legal_head'));
                         if ($this->Compmember->save()) {
                             /*
                               Send verification email

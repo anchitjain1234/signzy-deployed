@@ -102,7 +102,7 @@
       <?php echo $this->fetch('content'); ?>
       <?php echo $this->fetch('script'); ?>
       <footer>
-        <p>&copy; VerySure™ 2014</p>
+        <p class="text-center">&copy; VerySure™ 2014</p>
       </footer>
     </body>
     </html>

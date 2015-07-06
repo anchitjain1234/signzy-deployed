@@ -63,16 +63,13 @@ class DocumentsController extends AppController {
         $this->loadModel('Col');
 
         $parameters = array(
-            'fields' => array('did'),
             'conditions' => array('uid' => $uid)
         );
         $coldata = $this->Col->find('all', $parameters);
 
         $this->loadModel('Compmember');
-        debug($coldata);
         if ($coldata) {
             foreach ($coldata as $col):
-
                 if (isset($col['Col']['cid'])) {
                     $status = array();
                     array_push($status, array('status' => Configure::read('legal_head')));
@@ -93,7 +90,6 @@ class DocumentsController extends AppController {
                     );
 
                     $doc_data = $this->Document->find('first', $parameters);
-                    debug($doc_data);
                     $docs_with_timeaskey[$doc_data['Document']['modified']->sec] = $doc_data;
                     array_push($user_documents_data, $doc_data);
                 }
@@ -330,10 +326,10 @@ class DocumentsController extends AppController {
                                                 $user_info = $this->User->find('first', array('conditions' => array('id' => $comp_member['Compmember']['uid'])));
                                                 $title = 'Permission for Signing';
                                                 $link = Router::url(array('controller' => 'compmember', 'action' => 'authorise_user', $company_info_from_db[$companies_info[$email]]['Company']['id']), true);
-                                                $subject = 'Authorising user for document signing';
-                                                $content = $userdata['User']['name'] . " has requested to sign on your company behalf.Click on below button to authorise "
-                                                        . "users for signing the document.";
-                                                $button_text = 'Authorize users';
+                                                $subject = 'Authorising '.$userdata['User']['name'].' for document signing';
+                                                $content = $userdata['User']['name'] . " has requested to sign on".$company_info_from_db[$companies_info[$email]]['Company']['name'].".Click on below button to authorise "
+                                                        . "user for signing the document.";
+                                                $button_text = 'Authorize user';
                                                 $this->send_general_email($user_info, $link, $title, $content, $subject, $button_text);
                                             }
                                         endforeach;
