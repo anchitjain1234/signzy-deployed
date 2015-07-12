@@ -108,7 +108,7 @@ class UsersController extends AppController {
                                             'action' => 'verify',
                                             '?' => [
                                                 'username' => $this->request->data['User']['username'], 'token' => $this->request->data['User']['token'],],), true);
-                                //$this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
+                                $this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
                                 /*
                                   Enter code here for case when email sending is failed.
                                  */
@@ -123,7 +123,7 @@ class UsersController extends AppController {
                                         'action' => 'verify',
                                         '?' => [
                                             'username' => $this->request->data['User']['username'], 'token' => $this->request->data['User']['token'],],), true);
-                            //$this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
+                            $this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
                             /*
                               Enter code here for case when email sending is failed.
                              */
