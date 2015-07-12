@@ -60,7 +60,7 @@ class UsersController extends AppController {
                     if (isset($this->request->data['User']['companyname'])) {
                         $this->loadModel('Company');
                         $this->Company->set('name', $this->request->data['User']['companyname']);
-                        
+
                         /*
                          * If company name entered follows our validation rules or not.
                          */
@@ -70,12 +70,12 @@ class UsersController extends AppController {
                             /*
                              * Change this parameter in future as current implementation is flawed.
                              */
-                            if ($check_percentage >= 70) {
-                                $this->Company->save();
-                            } else {
-                                $this->set('companymatcherror', true);
-                                return $this->Session->setFlash(__('Please check highlighted fields.'), 'flash_warning');
-                            }
+                            // if ($check_percentage >= 70) {
+                            //     $this->Company->save();
+                            // } else {
+                            //     $this->set('companymatcherror', true);
+                            //     return $this->Session->setFlash(__('Please check highlighted fields.'), 'flash_warning');
+                            // }
                         } else {
                             $errors = $this->Company->validationErrors;
                             $this->set('companyuniquerror', true);
