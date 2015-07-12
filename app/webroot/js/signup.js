@@ -164,6 +164,7 @@ jQuery(document).ready(function () {
         localStorage.setItem("show_company_signup", "1");
         $('#company_name_div').show();
         $('#usercompanyname').attr('type', 'text');
+        $('#usercompanyname').removeAttr('disabled');
         $('#signup_as_company_btn').hide();
         $('#signup_as_individual_btn').show();
         $('#useremail').attr('placeholder', 'Enter your company email address');
@@ -175,6 +176,7 @@ jQuery(document).ready(function () {
         localStorage.setItem("show_company_signup", "0");
         $('#company_name_div').hide();
         $('#usercompanyname').attr('type', 'hidden');
+        $('#usercompanyname').attr('disabled', 'disabled');
         $('#signup_as_individual_btn').hide();
         $('#signup_as_company_btn').show();
         $('#useremail').attr('placeholder', 'Enter your email address');
