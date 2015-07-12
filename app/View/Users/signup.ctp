@@ -19,13 +19,13 @@
                         </div>
                     </div>
 
-                    <div class="form-group" id="company_name_div" style="display:none">
+                    <div class="form-group" id="company_name_div" style="">
                         <div class="form-group has-feedback">
                             <?php
                             echo $this->Form->label('companyname', 'Name of Company:', array('class' => 'control-label'));
                             echo $this->Form->input("companyname", array('class' => 'form-control', 'placeholder' => 'Name of your company',
                                                                           'id' => 'usercompanyname', 'label' => false, 'autocomplete' => "off" ,
-                                                                          'required' => 'required',"type"=>'hidden'));
+                                                                          'required' => 'required',"type"=>'hidden',"disabled"=>"disabled"));
                             ?>
                             <div class="error-message"> <?php if (isset($companymatcherror) && $companymatcherror) echo "Please make sure company name is same as email domain."; 
                                                               if (isset($companyuniquerror) && $companyuniquerror) echo $uniquerrorcontent; ?></div>
