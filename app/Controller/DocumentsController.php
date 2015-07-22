@@ -439,7 +439,7 @@ class DocumentsController extends AppController {
                             /*
                              * Send async call to send_email to send emails prtesent in queue.
                              */
-                            $url_for_email_sending = Router::url(array('controller' => 'users', 'action' => 'send_email', true);
+                            $url_for_email_sending = Router::url(array('controller' => 'users', 'action' => 'send_email', true));
                             $command = "wget -qO- ".$url_for_email_sending."  > /dev/null 2>/dev/null &";
                             exec($command);
                             $this->log('Call exited from sqs');
@@ -1089,7 +1089,7 @@ class DocumentsController extends AppController {
             /*
              * Make async call to send emails
              */
-            $url_for_email_sending = Router::url(array('controller' => 'users', 'action' => 'send_email', true);
+            $url_for_email_sending = Router::url(array('controller' => 'users', 'action' => 'send_email', true));
             $command = "wget -qO- ".$url_for_email_sending."  > /dev/null 2>/dev/null &";
             exec($command);
             $this->Session->setFlash(__('Data saved successfully.'), 'flash_success');
