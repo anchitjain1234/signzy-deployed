@@ -51,7 +51,7 @@
  * database. Uses database default not specified.
  *
  * sslmode =>
- * For Postgres specifies whether to 'disable', 'allow', 'prefer', or 'require' SSL for the 
+ * For Postgres specifies whether to 'disable', 'allow', 'prefer', or 'require' SSL for the
  * connection. The default value is 'allow'.
  *
  * unix_socket =>
@@ -69,15 +69,17 @@
 class DATABASE_CONFIG {
     public $default = array(
         'datasource' => 'Mongodb.MongodbSource',
-        'host' => 'localhost',
+        'host' => '127.0.0.1',
         'database' => 'verysure',
         'port' => 27017,
         'prefix' => '',
         'persistent' => 'true',
-        /* optional auth fields
-        'login' => 'mongo', 
-        'password' => 'awesomeness',
-        'replicaset' => array('host' => 'mongodb://hoge:hogehoge@localhost:27021,localhost:27022/blog', 
+        
+/*
+        'login' => 'anchitjain',
+        'password' => 'fuckoff1234',
+        
+        'replicaset' => array('host' => 'mongodb://hoge:hogehoge@localhost:27021,localhost:27022/blog',
                               'options' => array('replicaSet' => 'myRepl')
                      ),
         */
@@ -89,5 +91,5 @@ class DATABASE_CONFIG {
         'database' => 'test_mongo',
         'host' => 'localhost',
         'port' => 27017,
-    ); 
+    );
 }
