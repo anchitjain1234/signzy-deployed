@@ -1,5 +1,6 @@
 <?php
 
+require 'aws.phar';
 /**
  * Application level Controller
  *
@@ -30,12 +31,16 @@ App::uses('Controller', 'Controller');
  * @package		app.Controller
  * @link		http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
+
+CakeLog::config('default', array(
+    'engine' => 'File'
+));
 class AppController extends Controller {
 
     public $pageTitle;
 
     public function beforeRender() {
-        
+
         if ($this->name == 'CakeError') {
             if (AuthComponent::user('id')) {
                 $this->layout = 'insidelayout';
@@ -51,6 +56,15 @@ class AppController extends Controller {
                 $this->layout = 'mainlayout';
             }
         }
+    }
+
+    public function get_aws_sdk() {
+        $sharedConfig = [
+            'region' => 'us-west-2',
+            'version' => 'latest'
+        ];
+        $sdk = new Aws\Sdk($sharedConfig);
+        return $sdk;
     }
 
     public function get_temporary_document_name() {
@@ -80,21 +94,35 @@ class AppController extends Controller {
         return($sign_document_email->send());
     }
     
-    public function send_general_email($userdata,$link,$title,$content,$subject,$button_text) {
+    public function add_email_message_sqs($email_message,$sqsclient,$queueurl,$userdata)
+    {
+        $email_message['user_username'] = $userdata['User']['username'];
+        $email_message['user_name'] = $userdata['User']['name'];
+        $email_json = json_encode($email_message);
+        
+        /*
+         * Add code here for the case when message cant be added successfully into SQS.
+         */
+        $sqsclient->sendMessage(array(
+            'QueueUrl' => $queueurl,
+            'MessageBody' => $email_json,
+        ));
+    }
+
+    public function send_general_email($userdata, $link, $title, $content, $subject, $button_text) {
         $email = new CakeEmail('mandrill_signup');
         $email->template('general_email', 'notification_email_layout')
-              ->viewVars(array('link' => $link,
+                ->viewVars(array('link' => $link,
                     'name_of_user' => $userdata['User']['name'],
                     'title_for_email' => $title,
-                     'content_for_email'=>$content,
-                  'button_text'=>$button_text));
-        $email ->to($userdata['User']['username']);
+                    'content_for_email' => $content,
+                    'button_text' => $button_text));
+        $email->to($userdata['User']['username']);
         $email->subject($subject);
         return($email->send());
     }
-    
-    public function company_name_from_email_check($email,$company_name)
-    {
+
+    public function company_name_from_email_check($email, $company_name) {
         /*
          * Getting the text from email address between "@" and first "."
          * i.e. a@asdasd.com will give asdasd
@@ -107,7 +135,7 @@ class AppController extends Controller {
          * this would be increasing false positives.
          */
         $company_name_from_email = strtolower($regex_output[1]);
-        
+
         /*
          * Getting similarity between lowered case of 
          */

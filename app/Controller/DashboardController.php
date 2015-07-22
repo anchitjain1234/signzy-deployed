@@ -43,27 +43,33 @@ class DashboardController extends AppController {
     Reduce the SQL queries here by combining them as much as possible
     */
     $this->loadModel('Document');
-    $params = array(
-      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => Configure::read('doc_pending')),
-    );
-    $pendingcount = $this->Document->find('count',$params);
-
-    $params = array(
-      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => Configure::read('doc_completed')),
-    );
-    $completedcount = $this->Document->find('count',$params);
-
-    $params = array(
-      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => Configure::read('doc_void')),
-    );
-    $voidcount = $this->Document->find('count',$params);
-
-    $params = array(
-      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => Configure::read('doc_rejected')),
-    );
-    $disputedcount = $this->Document->find('count',$params);
+//    $params = array(
+//      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => Configure::read('doc_pending')),
+//    );
+//    $pendingcount = $this->Document->find('count',$params);
+//
+//    $params = array(
+//      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => Configure::read('doc_completed')),
+//    );
+//    $completedcount = $this->Document->find('count',$params);
+//
+//    $params = array(
+//      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => Configure::read('doc_void')),
+//    );
+//    $voidcount = $this->Document->find('count',$params);
+//
+//    $params = array(
+//      'conditions' => array('ownerid' => CakeSession::read("Auth.User.id"),'status' => Configure::read('doc_rejected')),
+//    );
+//    $disputedcount = $this->Document->find('count',$params);
 
     $this->loadModel('Col');
+    
+    $pendingcount = 0;
+    $completedcount = 0;
+    $voidcount = 0;
+    $disputedcount = 0;
+    
     $params = array(
       'conditions' => array('uid' => CakeSession::read("Auth.User.id")),
       'fields' => 'did'

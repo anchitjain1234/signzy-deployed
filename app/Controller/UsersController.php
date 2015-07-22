@@ -108,7 +108,7 @@ class UsersController extends AppController {
                                             'action' => 'verify',
                                             '?' => [
                                                 'username' => $this->request->data['User']['username'], 'token' => $this->request->data['User']['token'],],), true);
-                                $this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
+                                //$this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
                                 /*
                                   Enter code here for case when email sending is failed.
                                  */
@@ -123,7 +123,7 @@ class UsersController extends AppController {
                                         'action' => 'verify',
                                         '?' => [
                                             'username' => $this->request->data['User']['username'], 'token' => $this->request->data['User']['token'],],), true);
-                            $this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
+                            //$this->sendemail('signupemail', 'notification_email_layout', $this->request->data, $email_verification_link, 'Verification email');
                             /*
                               Enter code here for case when email sending is failed.
                              */
@@ -396,12 +396,48 @@ class UsersController extends AppController {
             throw new NotFoundException(__('Invalid URL'));
         }
     }
+    
+    /*
+     * Send emails by getting messages from the SQS.
+     */
+    public function send_email() {
+        $this->autorender = false;
+        $this->layout = false;
+        $aws_sdk = $this->get_aws_sdk();
+        $sqs_client = $aws_sdk->createSqs();
 
-    public function email_test() {
-        $this->layout = 'Emails/html/main_layout_email';
-        $this->set('email_verification_link', 'afsdfsdf');
-
-        return $this->render('/Emails/html/signupemail');
+        $email_queue_localhost = $sqs_client->createQueue(array('QueueName' => 'localhost_emails'));
+        $email_queue_localhost_url = $email_queue_localhost->get('QueueUrl');
+//        $this->log("send email running");
+        $receive_email = $sqs_client->receiveMessage(array(
+            'QueueUrl' => $email_queue_localhost_url,
+            'MaxNumberOfMessages' => 5,
+            'VisibilityTimeout' => 5
+        ));
+//        debug($receive_email['Messages']);
+        while (count($receive_email) > 0) {
+            foreach ($receive_email['Messages'] as $message) {
+                $body = json_decode($message['Body']);
+                $message_receipt_handle = $message['ReceiptHandle'];
+                $userdata = array();
+//                CakeLog::write('emails', $body);
+//                $this->log("email body");
+//                $this->log($body);
+                $userdata['User']['name'] = $body->user_name;
+                $userdata['User']['username'] = $body->user_username;
+                if ($this->send_general_email($userdata, $body->link, $body->title, $body->content, $body->subject, $body->button_text)) {
+                    $sqs_client->deleteMessage(array(
+                        'QueueUrl' => $email_queue_localhost_url,
+                        'ReceiptHandle' => $message_receipt_handle
+                    ));
+                }
+            }
+            $receive_email = $sqs_client->receiveMessage(array(
+                'QueueUrl' => $email_queue_localhost_url,
+                'MaxNumberOfMessages' => 5,
+                'VisibilityTimeout' => 5
+            ));
+        }
     }
 
 }

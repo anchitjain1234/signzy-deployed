@@ -38,7 +38,7 @@
 
                   <td valign="top" class="mcnTextContent" style="padding: 9px 18px;color: #3B0E0E;font-family: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;font-size: 36px;font-weight: bold;line-height: 100%;text-align: center;">
 
-                      <div style="text-align: center;"><strong>Verysure</strong></div>
+                      <div style="text-align: center;"><strong>Signzy</strong></div>
 
                   </td>
               </tr>
@@ -222,7 +222,7 @@ Thanks for your help!<br>
 
                   <td valign="top" class="mcnTextContent" style="padding-top:9px; padding-right: 18px; padding-bottom: 9px; padding-left: 18px;">
 
-                      <em>Copyright © 2015 Verysure, All rights reserved.</em><br>
+                      <em>Copyright © 2015 Signzy, All rights reserved.</em><br>
 <br>
 <br>
 <strong>Our mailing address is:</strong><br>
