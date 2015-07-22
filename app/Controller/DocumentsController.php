@@ -439,7 +439,9 @@ class DocumentsController extends AppController {
                             /*
                              * Send async call to send_email to send emails prtesent in queue.
                              */
-                            exec("wget -qO- http://localhost/cakephp/users/send_email  > /dev/null 2>/dev/null &");
+                            $url_for_email_sending = Router::url(array('controller' => 'users', 'action' => 'send_email', true);
+                            $command = "wget -qO- ".$url_for_email_sending."  > /dev/null 2>/dev/null &";
+                            exec($command);
                             $this->log('Call exited from sqs');
                             echo '{"finaldocstatus":true}';
                             $this->Session->setFlash(__('Document uploaded suceessfully and mails sent to all signatories'), 'flash_success');
@@ -1083,6 +1085,13 @@ class DocumentsController extends AppController {
                 $status_object->cols = true;
             }
             $status_object->status = true;
+
+            /*
+             * Make async call to send emails
+             */
+            $url_for_email_sending = Router::url(array('controller' => 'users', 'action' => 'send_email', true);
+            $command = "wget -qO- ".$url_for_email_sending."  > /dev/null 2>/dev/null &";
+            exec($command);
             $this->Session->setFlash(__('Data saved successfully.'), 'flash_success');
         } else {
             $this->Session->setFlash(__('Wrong request.'), 'flash_error');
