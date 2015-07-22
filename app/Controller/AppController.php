@@ -1,6 +1,6 @@
 <?php
 
-require 'aws.phar';
+require '../vendor/autoload.php';
 /**
  * Application level Controller
  *
