@@ -42,7 +42,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <?php echo $this->Html->link('VerySure™',array('controller'=>'users','action'=>'index'),array('class' => 'navbar-brand'));?>
+          <?php echo $this->Html->link('Signzy™',array('controller'=>'users','action'=>'index'),array('class' => 'navbar-brand'));?>
         </div>
         <ul class="nav navbar-nav">
           <li><?php echo $this->Html->link('Documents',array('controller'=>'documents','action'=>'index'))?></li>
@@ -62,7 +62,8 @@
     <?php echo $this->fetch('content'); ?>
     <?php echo $this->fetch('script'); ?>
     <footer>
-      <p class="text-center">&copy; VerySure™ 2014</p>
+      <p class="text-center">&copy; Signzy™ 2014</p>
     </footer>
   </body>
+  <?php echo $this->element('sql_dump'); ?>
 </html>

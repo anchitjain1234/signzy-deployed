@@ -114,10 +114,3 @@
 
       </div>
     </div>
-
-    <div class="container">
-      <hr>
-      <footer>
-        <p>&copy; VerySure™ 2014</p>
-      </footer>
-    </div>

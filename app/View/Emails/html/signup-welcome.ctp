@@ -1,4 +1,4 @@
-<?php $this->assign('title', 'Welcome to VerySure'); ?>
+<?php $this->assign('title', 'Welcome to Signzy'); ?>
 
 <center>
         	<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="backgroundTable">
@@ -13,7 +13,7 @@
                                     <table border="0" cellpadding="10" cellspacing="0" width="100%">
                                     	<tr>
                                         	<td valign="top">
-                                            	<div mc:edit="std_preheader_content">Welcome to VerySure</div>
+                                            	<div mc:edit="std_preheader_content">Welcome to Signzy</div>
                                             </td>
                                             <!-- *|IFNOT:ARCHIVE_PAGE|* -->
 											<td valign="top" width="190">
@@ -42,7 +42,7 @@
                                                 <table border="0" cellpadding="20" cellspacing="0" width="100%">
                                                     <tr>
                                                         <td valign="top">
-                                                            <div mc:edit="top_content"><h1 class="h1">Welcome to Verysure</h1>
+                                                            <div mc:edit="top_content"><h1 class="h1">Welcome to Signzy</h1>
 </div>
 														</td>
                                                     </tr>
@@ -78,8 +78,8 @@
                                                     </tr>
                                                     <tr>
                                                         <td valign="top">
-                                                            <div mc:edit="bottom_content">VerySure is contract signing platform.&nbsp;<br>
-Feel free to contact us at contact@verysure.com
+                                                            <div mc:edit="bottom_content">Signzy is contract signing platform.&nbsp;<br>
+Feel free to contact us at contact@Signzy.com
 <h3 class="h3">&nbsp;</h3>
 </div>
 														</td>
@@ -115,7 +115,7 @@ Feel free to contact us at contact@verysure.com
                                                 <table border="0" cellpadding="10" cellspacing="0" width="100%">
                                                     <tr>
                                                         <td valign="top" width="350">
-                                                            <div mc:edit="std_footer"><em>Copyright &copy; 2015 Verysure, All rights reserved.</em><br>
+                                                            <div mc:edit="std_footer"><em>Copyright &copy; 2015 Signzy, All rights reserved.</em><br>
 <br>
 <strong>Our mailing address is:</strong><br>
 Cercles,Hauz Khas VIllage,New Delhi<br>

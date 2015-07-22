@@ -32,7 +32,7 @@
           </button>
           <?php
           echo $this->Html->link(
-            'VerySure™',
+            'Signzy™',
             array(
               'controller' => 'users',
               'action' => 'index'
@@ -102,7 +102,7 @@
       <?php echo $this->fetch('content'); ?>
       <?php echo $this->fetch('script'); ?>
       <footer>
-        <p class="text-center">&copy; VerySure™ 2014</p>
+        <p class="text-center">&copy; Signzy™ 2014</p>
       </footer>
     </body>
     </html>

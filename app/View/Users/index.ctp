@@ -1,10 +1,10 @@
-<?php $this->assign('title', 'VerySure™ : Execute Agreements easily!'); ?>
+<?php $this->assign('title', 'Signzy™ : Execute Agreements easily!'); ?>
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
       <div class="container">
         <h1>Execute Agreements!</h1>
-        <p>VerySure™ allows you to sign agreements faster, cheaper and securly!</p>
+        <p>Signzy™ allows you to sign agreements faster, cheaper and securly!</p>
         <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more &raquo;</a></p>
       </div>
     </div>
@@ -19,12 +19,12 @@
         </div>
         <div class="col-md-4">
           <h2>Secure</h2>
-          <p>VerySure™ is purely cloudbased and uses PCI certified infrastrcuture, used by the banks</p>
+          <p>Signzy™ is purely cloudbased and uses PCI certified infrastrcuture, used by the banks</p>
           <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
        </div>
         <div class="col-md-4">
           <h2>Legal</h2>
-          <p>VerySure™'s processes are in coherence with Indian IT Act, which makes it even more compelling to use</p>
+          <p>Signzy™'s processes are in coherence with Indian IT Act, which makes it even more compelling to use</p>
           <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
         </div>
       </div>
