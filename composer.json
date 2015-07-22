@@ -20,7 +20,8 @@
 	"require": {
 		"php": ">=5.2.8",
 		"ext-mcrypt": "*",
-		"ext-mongo": "*"
+		"ext-mongo": "*",
+		"aws/aws-sdk-php": "^3.2"
 
 	},
 	"require-dev": {
