@@ -1,6 +1,6 @@
 <?php
 
-require '../vendor/autoload.php';
+require '../vendor/aws.phar';
 /**
  * Application level Controller
  *
@@ -107,6 +107,22 @@ class AppController extends Controller {
             'QueueUrl' => $queueurl,
             'MessageBody' => $email_json,
         ));
+    }
+    
+    public function add_upload_message_sqs($docname,$sqsclient,$queueurl)
+    {
+        $upload_message['docname']=$docname;
+        $upload_json = json_encode($upload_message);
+        
+        $sqsclient->sendMessage(array(
+            'QueueUrl' => $queueurl,
+            'MessageBody' => $upload_json,
+        ));
+    }
+    
+    public function upload_s3_from_sqs()
+    {
+        exec("wget -qO- http://localhost/cakephp/users/upload_doc  > /dev/null 2>/dev/null &");
     }
 
     public function send_general_email($userdata, $link, $title, $content, $subject, $button_text) {

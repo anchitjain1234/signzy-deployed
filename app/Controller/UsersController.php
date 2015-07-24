@@ -396,10 +396,11 @@ class UsersController extends AppController {
             throw new NotFoundException(__('Invalid URL'));
         }
     }
-    
+
     /*
      * Send emails by getting messages from the SQS.
      */
+
     public function send_email() {
         $this->autorender = false;
         $this->layout = false;
@@ -436,6 +437,57 @@ class UsersController extends AppController {
                 'QueueUrl' => $email_queue_localhost_url,
                 'MaxNumberOfMessages' => 5,
                 'VisibilityTimeout' => 5
+            ));
+        }
+    }
+
+    public function upload_doc() {
+
+        $this->autorender = false;
+        $this->layout = false;
+        $aws_sdk = $this->get_aws_sdk();
+        $sqs_client = $aws_sdk->createSqs();
+        $s3_client = $aws_sdk->createS3();
+
+        $upload_queue_localhost = $sqs_client->createQueue(array('QueueName' => 'localhost_uploads'));
+        $upload_queue_localhost_url = $upload_queue_localhost->get('QueueUrl');
+//        $this->log("send email running");
+        $receive_upload = $sqs_client->receiveMessage(array(
+            'QueueUrl' => $upload_queue_localhost_url,
+            'MaxNumberOfMessages' => 1,
+            'VisibilityTimeout' => 30
+        ));
+//        debug($receive_email['Messages']);
+        while (count($receive_upload) > 0) {
+            foreach ($receive_upload['Messages'] as $message) {
+                $body = json_decode($message['Body']);
+                $this->log('upload');
+                $this->log($body);
+                $message_receipt_handle = $message['ReceiptHandle'];
+
+                $file_in_s3 = $s3_client->doesObjectExist(Configure::read('s3_bucket_name'), $body->docname);
+
+                if ($file_in_s3) {
+                    $sqs_client->deleteMessage(array(
+                        'QueueUrl' => $upload_queue_localhost_url,
+                        'ReceiptHandle' => $message_receipt_handle
+                    ));
+                    $this->log('already uploaded');
+                } else {
+                    $upload_result = $s3_client->upload(Configure::read('s3_bucket_name'), $body->docname, fopen(Configure::read('upload_location_url') . $body->docname, 'r'));
+                    if ($upload_result) {
+                        $sqs_client->deleteMessage(array(
+                            'QueueUrl' => $upload_queue_localhost_url,
+                            'ReceiptHandle' => $message_receipt_handle
+                        ));
+                        $this->log('uploaded');
+                    }
+                }
+            }
+            $receive_upload = $sqs_client->receiveMessage(array(
+                'QueueUrl' => $upload_queue_localhost_url,
+                'MaxNumberOfMessages' => 1,
+                'VisibilityTimeout' => 30
             ));
         }
     }
