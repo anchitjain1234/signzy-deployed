@@ -123,7 +123,16 @@ class AppController extends Controller {
     
     public function upload_s3_from_sqs()
     {
-        exec("wget -qO- http://localhost/cakephp/users/upload_doc  > /dev/null 2>/dev/null &");
+        $url = Router::url(array('controller' => 'users', 'action' => 'upload_doc'), true);
+        $command = "wget -qO- ".$url."  > /dev/null 2>/dev/null &";
+        exec($command);
+    }
+
+    public function send_email_from_sqs()
+    {
+        $url = Router::url(array('controller' => 'users', 'action' => 'send_email'), true);
+        $command = "wget -qO- ".$url."  > /dev/null 2>/dev/null &";
+        exec($command);
     }
 
     public function send_general_email($userdata, $link, $title, $content, $subject, $button_text) {
