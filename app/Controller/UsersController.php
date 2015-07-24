@@ -441,7 +441,6 @@ class UsersController extends AppController {
                 'VisibilityTimeout' => 5
             ));
         }
-        exit;
     }
 
     public function upload_doc() {
@@ -493,7 +492,6 @@ class UsersController extends AppController {
                 'VisibilityTimeout' => 30
             ));
         }
-        exit;
     }
 
 }
