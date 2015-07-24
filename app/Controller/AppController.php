@@ -92,6 +92,7 @@ class AppController extends Controller {
         $sign_document_email->template($email_view, $email_layout)
                 ->viewVars(array('link' => $link,
                     'name_of_user' => $userdata['User']['name']));
+        $this->log('in send mail');
         return($sign_document_email->send());
     }
     
