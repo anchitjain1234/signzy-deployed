@@ -418,7 +418,7 @@ class UsersController extends AppController {
             'VisibilityTimeout' => 5
         ));
 //        debug($receive_email['Messages']);
-        while (count($$receive_email['Messages']) > 0) {
+        while (count($receive_email['Messages']) > 0) {
             foreach ($receive_email['Messages'] as $message) {
                 $body = json_decode($message['Body']);
                 $message_receipt_handle = $message['ReceiptHandle'];
@@ -460,7 +460,7 @@ class UsersController extends AppController {
             'VisibilityTimeout' => 30
         ));
 //        debug($receive_email['Messages']);
-        while (count($$receive_upload['Messages']) > 0) {
+        while (count($receive_upload['Messages']) > 0) {
             foreach ($receive_upload['Messages'] as $message) {
                 $body = json_decode($message['Body']);
                 $this->log('upload');
