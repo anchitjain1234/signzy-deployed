@@ -1,5 +1,7 @@
 <?php
 
+require '../vendor/autoload.php';
+
 /**
  * Application level Controller
  *
