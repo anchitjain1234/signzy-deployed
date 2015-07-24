@@ -1,6 +1,5 @@
 <?php
 
-require '../vendor/aws.phar';
 /**
  * Application level Controller
  *
