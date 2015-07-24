@@ -407,7 +407,7 @@ class UsersController extends AppController {
         $aws_sdk = $this->get_aws_sdk();
         $sqs_client = $aws_sdk->createSqs();
 
-        $email_queue_localhost = $sqs_client->createQueue(array('QueueName' => 'localhost_emails'));
+        $email_queue_localhost = $sqs_client->createQueue(array('QueueName' => Configure::read('email_queue')));
         $email_queue_localhost_url = $email_queue_localhost->get('QueueUrl');
 //        $this->log("send email running");
         $receive_email = $sqs_client->receiveMessage(array(
@@ -449,7 +449,7 @@ class UsersController extends AppController {
         $sqs_client = $aws_sdk->createSqs();
         $s3_client = $aws_sdk->createS3();
 
-        $upload_queue_localhost = $sqs_client->createQueue(array('QueueName' => 'localhost_uploads'));
+        $upload_queue_localhost = $sqs_client->createQueue(array('QueueName' => Configure::read('upload_queue')));
         $upload_queue_localhost_url = $upload_queue_localhost->get('QueueUrl');
 //        $this->log("send email running");
         $receive_upload = $sqs_client->receiveMessage(array(
