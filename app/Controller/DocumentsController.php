@@ -290,7 +290,7 @@ class DocumentsController extends AppController {
                                 $aws_sdk = $this->get_aws_sdk();
                                 $sqs_client = $aws_sdk->createSqs();
 
-                                $email_queue_localhost = $sqs_client->createQueue(array('QueueName' => 'localhost_emails'));
+                                $email_queue_localhost = $sqs_client->createQueue(array('QueueName' => Configure::read('email_queue')));
                                 $email_queue_localhost_url = $email_queue_localhost->get('QueueUrl');
 
                                 $sqs_client->setQueueAttributes(array(
@@ -316,7 +316,7 @@ class DocumentsController extends AppController {
                                      * If this collabarator is already present as rejected signatory in Compmember than send the email to the 
                                      * document owner that this signatory is already rejected from the legal heads of the company.
                                      */
-                                    if (count($previously_present_check) != 0 && ($previously_present_check['Compmember']['status'] === Configure::read('rejected_sign'))) {                                       
+                                    if (count($previously_present_check) != 0 && ($previously_present_check['Compmember']['status'] === Configure::read('rejected_sign'))) {
                                         $email_to_be_sent = array();
                                         $email_to_be_sent['link'] = Router::url(array('controller' => 'documents', 'action' => 'edit', $company_info_from_db[$companies_info[$email]]['Company']['id']), true);
                                         $email_to_be_sent['title'] = 'Signatory rejected';
@@ -326,7 +326,7 @@ class DocumentsController extends AppController {
                                                 . ' has been rejected by the company legal head(s).Please click the below button to edit your signatories and remove'
                                                 . 'the rejected signatories.';
                                         $email_to_be_sent['button_text'] = 'Edit signatories';
-                                        $this->add_email_message_sqs($email_to_be_sent, $sqs_client, $email_queue_localhost_url, $userdata);                                    
+                                        $this->add_email_message_sqs($email_to_be_sent, $sqs_client, $email_queue_localhost_url, $userdata);
                                         continue;
                                     }
                                     /*
@@ -381,10 +381,10 @@ class DocumentsController extends AppController {
                                         $email_to_be_sent['link'] = $document_signing_link;
                                         $email_to_be_sent['title'] = 'Document SIgning Request';
                                         $email_to_be_sent['subject'] = 'Document Signing Request';
-                                        $email_to_be_sent['content'] = 'You have been requested by '.$owner_data['User']['name'].' to sign a document on our website.Please '
+                                        $email_to_be_sent['content'] = 'You have been requested by ' . $owner_data['User']['name'] . ' to sign a document on our website.Please '
                                                 . 'click below button to view your document signing requests.';
                                         $email_to_be_sent['button_text'] = 'View Document Signing Request';
-                                        $this->add_email_message_sqs($email_to_be_sent, $sqs_client, $email_queue_localhost_url, $userdata);                                       
+                                        $this->add_email_message_sqs($email_to_be_sent, $sqs_client, $email_queue_localhost_url, $userdata);
                                     } else {
                                         /*
                                          * Sending email to legal head(s) to ask permission for this collabarator to sign the document.
@@ -403,7 +403,6 @@ class DocumentsController extends AppController {
                                                         . "user for signing the document.";
                                                 $email_to_be_sent['button_text'] = 'Authorize user';
                                                 $this->add_email_message_sqs($email_to_be_sent, $sqs_client, $email_queue_localhost_url, $user_info);
-
                                             }
                                         endforeach;
 
@@ -428,7 +427,6 @@ class DocumentsController extends AppController {
                                                 . "company.Click below button to send email again to company legal head for granting access.";
                                         $email_to_be_sent['button_text'] = "Sign Document";
                                         $this->add_email_message_sqs($email_to_be_sent, $sqs_client, $email_queue_localhost_url, $userdata);
-                                        
                                     }
                                 } else {
                                     echo '{"finaldocstatus":false,"error":2}';
@@ -439,9 +437,7 @@ class DocumentsController extends AppController {
                             /*
                              * Send async call to send_email to send emails prtesent in queue.
                              */
-                            $url_for_email_sending = Router::url(array('controller' => 'users', 'action' => 'send_email'), true);
-                            $command = "wget -qO- ".$url_for_email_sending."  > /dev/null 2>/dev/null &";
-                            exec($command);
+                            exec("wget -qO- http://localhost/cakephp/users/send_email  > /dev/null 2>/dev/null &");
                             $this->log('Call exited from sqs');
                             echo '{"finaldocstatus":true}';
                             $this->Session->setFlash(__('Document uploaded suceessfully and mails sent to all signatories'), 'flash_success');
@@ -516,7 +512,41 @@ class DocumentsController extends AppController {
                  * lost from the temporary files.
                  */
                 if (move_uploaded_file($_FILES['data']['tmp_name']['Document']['file'], Configure::read('upload_location_url') . $temporary_document_name)) {
-
+                    
+                    /*
+                     * Change this upload from queue instead of uploading here as it takes really long time.
+                     * Make this process async.
+                     */
+                    
+                    /*
+                     * Upload file to S3 for permanent storage as the current location is temporary only.
+                     */
+                    $aws_sdk = $this->get_aws_sdk();
+//                    $s3_client = $aws_sdk->createS3();
+                    $sqs_client = $aws_sdk->createSqs();
+                    
+                    $uploading_queue_localhost = $sqs_client->createQueue(array('QueueName' => Configure::read('upload_queue')));
+                    $uploading_queue_localhost_url = $uploading_queue_localhost->get('QueueUrl');
+                    
+                    $sqs_client->setQueueAttributes(array(
+                        'QueueUrl' => $uploading_queue_localhost_url,
+                        'Attributes' => array(
+                            'VisibilityTimeout' => 30,
+                            'ReceiveMessageWaitTimeSeconds' => 5,
+                            'DelaySeconds' => 0
+                        ),
+                    ));
+                    
+                    $this->add_upload_message_sqs($temporary_document_name, $sqs_client, $uploading_queue_localhost_url);
+                    $this->log('going to upload into s3');
+                    $this->upload_s3_from_sqs();
+                    $this->log('exiting from s3');
+                    /*
+                     * Add code here for the case when document couldn't be uploaded into S3 but has been successfully uploaded 
+                     * in temporary location.
+                     * In this case we should log this and should try it in future.
+                     */
+//                    $upload_result = $s3_client->upload(Configure::read('s3_bucket_name'), $temporary_document_name, fopen(Configure::read('upload_location_url') . $temporary_document_name, 'r'));
                     //echo $file;
                     echo '{"documentstatus" : true '
                     . ',"documentname" : "' . $temporary_document_name . '"'
@@ -899,7 +929,7 @@ class DocumentsController extends AppController {
             $aws_sdk = $this->get_aws_sdk();
             $sqs_client = $aws_sdk->createSqs();
 
-            $email_queue_localhost = $sqs_client->createQueue(array('QueueName' => 'localhost_emails'));
+            $email_queue_localhost = $sqs_client->createQueue(array('QueueName' => Configure::read('email_queue')));
             $email_queue_localhost_url = $email_queue_localhost->get('QueueUrl');
             $owner_data = $this->User->find('first', array('conditions' => array('id' => CakeSession::read('Auth.User.id'))));
             if (isset($this->request->data['newname'])) {
@@ -1085,13 +1115,6 @@ class DocumentsController extends AppController {
                 $status_object->cols = true;
             }
             $status_object->status = true;
-
-            /*
-             * Make async call to send emails
-             */
-            $url_for_email_sending = Router::url(array('controller' => 'users', 'action' => 'send_email'), true);
-            $command = "wget -qO- ".$url_for_email_sending."  > /dev/null 2>/dev/null &";
-            exec($command);
             $this->Session->setFlash(__('Data saved successfully.'), 'flash_success');
         } else {
             $this->Session->setFlash(__('Wrong request.'), 'flash_error');
@@ -1143,9 +1166,47 @@ class DocumentsController extends AppController {
         $docurl = Configure::read('upload_location_url') . $docname . '.' . $extension;
         $file_check = file_exists($docurl);
 
+        /*
+         * If file isnt in temporary location check file existence in S3
+         */
         if (!$file_check) {
-            throw new NotFoundException(__('Invalid URL'));
+            $this->log('here 1');
+            $aws_sdk = $this->get_aws_sdk();
+            $s3_client = $aws_sdk->createS3();
+
+            $file_in_s3 = $s3_client->doesObjectExist(Configure::read('s3_bucket_name'), $docname . '.' . $extension);
+
+            if ($file_in_s3) {
+                $this->log('here 2');
+                /*
+                 * If file is present in S3 download it in temporary location.
+                 */
+                $result = $s3_client->getObject(array(
+                    'Bucket' => Configure::read('s3_bucket_name'),
+                    'Key' => $docname . '.' . $extension,
+                    'SaveAs' => $docurl
+                ));
+//                $file_key = $docname . '.' . $extension;
+//                $furl = "{Configure::read('s3_bucket_name')}/{$file_key}";
+//                $request = $s3_client->get($furl);
+//                $docurl = $s3_client->createPresignedUrl($request,'+10 minutes');
+////                $docurl = $s3_client->getObjectUrl(Configure::read('s3_bucket_name'), $docname . '.' . $extension,'+10 minutes');
+//                echo $docurl;
+//                $this->log($docurl);
+                /*
+                 * When we cant download the document from S3.
+                 */
+                if (!$result) {
+                    throw new NotFoundException(__('Cant download document.Please try again later.'));
+                }
+            } else {
+                /*
+                 * When doc is not present even in S3.
+                 */
+                throw new NotFoundException(__('Invalid URL'));
+            }
         }
+
         $colids = [];
 
         $this->loadModel('Col');
@@ -1170,10 +1231,6 @@ class DocumentsController extends AppController {
              */
             $colids = [];
 
-            /*
-             * FIrst pushing ownerid into colids.
-             */
-            array_push($colids, $docinfo['Document']['ownerid']);
             foreach ($cols as $col):
                 if (isset($col['Col']['cid'])) {
                     /*
@@ -1235,8 +1292,37 @@ class DocumentsController extends AppController {
         $docurl = Configure::read('upload_location_url') . $docname . '.' . $extension;
         $file_check = file_exists($docurl);
 
+        /*
+         * If file isnt in temporary location check file existence in S3
+         */
         if (!$file_check) {
-            throw new NotFoundException(__('Invalid URL'));
+            $aws_sdk = $this->get_aws_sdk();
+            $s3_client = $aws_sdk->createS3();
+
+            $file_in_s3 = $s3_client->doesObjectExist(Configure::read('s3_bucket_name'), $docname . '.' . $extension);
+
+            if ($file_in_s3) {
+                /*
+                 * If file is present in S3 download it in temporary location.
+                 */
+                $result = $s3_client->getObject(array(
+                    'Bucket' => Configure::read('s3_bucket_name'),
+                    'Key' => $docname . '.' . $extension,
+                    'SaveAs' => $docurl
+                ));
+                
+                /*
+                 * When we cant download the document from S3.
+                 */
+                if (!$result) {
+                    throw new NotFoundException(__('Cant download document.Please try again later.'));
+                }
+            } else {
+                /*
+                 * When doc is not present even in S3.
+                 */
+                throw new NotFoundException(__('Invalid URL'));
+            }
         }
 
         $this->loadModel('Col');
@@ -1250,7 +1336,6 @@ class DocumentsController extends AppController {
             $cols = $this->Col->find('all', array('conditions' => array('did' => $docinfo['Document']['id'])));
 
             $colids = [];
-            array_push($colids, $docinfo['Document']['ownerid']);
 
             foreach ($cols as $col):
                 if (isset($col['Col']['cid'])) {

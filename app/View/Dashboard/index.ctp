@@ -1,4 +1,4 @@
-<?php $this->assign('title', 'VerySure™ : Execute Agreements easily!'); ?>
+<?php $this->assign('title', 'Signzy™ : Execute Agreements easily!'); ?>
 <?php  echo $this->Html->css('signup', null, array('inline' => false)); ?>
 
 <div class="container">
