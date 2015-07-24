@@ -48,20 +48,20 @@ class EmailConfig {
 
 	public $mandrill_signup = array(
 		'transport' => 'Smtp',
-		'from' => array('noreply@verysure.com' => 'Verysure Bot'),
-		'host' => 'smtp.sendgrid.net',
+		'from' => array('noreply@signzy.com' => 'Signzy Bot'),
+		'host' => 'ssl://email-smtp.us-west-2.amazonaws.com',
 		//'host' => 'smtp.mandrillapp.com',
-		'port' => 587,
+		'port' => 465,
 		'timeout' => 30,
 		/*
 		username' => 'eckovation@yandex.com',
 		'password' => '7-kRluJ9lCM4uf_aPTRHOQ',
 */
-		'username' => 'wgMgsFECGV',
-		'password' => 'PRKn5XB56kup9708',
+		'username' => 'AKIAJVHEMT5XJADBZHGA',
+		'password' => 'AsQx5HmGL3QfjMnsAVhYiabYzlGWhGDKWCEs28EZiTY1',
 		'log' => true,
-		'replyTo' => 'signupreply@verysure.com',
-		'returnPath' => 'signupreturn@verysure.com',
+		'replyTo' => 'contact@signzy.com',
+		'returnPath' => 'return@signzy.com',
 		'emailFormat' => 'html'
 		//'charset' => 'utf-8',
 		//'headerCharset' => 'utf-8',
