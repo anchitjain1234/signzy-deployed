@@ -5,6 +5,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+/*
+ * First create the bucket in S3 manually and entre the name of bucket here.
+ */
+$config['s3_bucket_name'] = 'documentuploads';
+
+$config['email_queue'] = 'deployement_emails';
+$config['upload_queue'] = 'deployement_uploads';
+
 $config['doc_owner'] = '-1';
 $config['doc_pending'] = '0';
 $config['doc_completed'] = '1';

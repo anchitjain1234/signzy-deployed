@@ -32,7 +32,7 @@
       </button>
       <?php
       echo $this->Html->link(
-        'VerySure™',
+        'Signzy™',
         array(
           'controller' => 'users',
           'action' => 'index'
