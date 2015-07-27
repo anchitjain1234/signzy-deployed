@@ -411,7 +411,7 @@ class UsersController extends AppController {
 
         $email_queue_localhost = $sqs_client->createQueue(array('QueueName' => Configure::read('email_queue')));
         $email_queue_localhost_url = $email_queue_localhost->get('QueueUrl');
-//        $this->log("send email running");
+        $this->log("send email running");
         $receive_email = $sqs_client->receiveMessage(array(
             'QueueUrl' => $email_queue_localhost_url,
             'MaxNumberOfMessages' => 5,
@@ -424,8 +424,8 @@ class UsersController extends AppController {
                 $message_receipt_handle = $message['ReceiptHandle'];
                 $userdata = array();
 //                CakeLog::write('emails', $body);
-//                $this->log("email body");
-//                $this->log($body);
+                $this->log("email body");
+                $this->log($body);
                 $userdata['User']['name'] = $body->user_name;
                 $userdata['User']['username'] = $body->user_username;
                 if ($this->send_general_email($userdata, $body->link, $body->title, $body->content, $body->subject, $body->button_text)) {

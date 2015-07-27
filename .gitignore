@@ -13,6 +13,8 @@ app/webroot/files
 /dist
 /tags
 *.mo
+robots.txt
+
 
 # IDE and editor specific files #
 #################################
