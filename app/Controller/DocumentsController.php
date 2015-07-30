@@ -840,7 +840,11 @@ class DocumentsController extends AppController {
         $this->set('ownerdata', $this->User->findById($document['Document']['ownerid']));
         $this->set('docudata', $document);
         $this->loadModel('Col');
-
+        
+        /*
+         * Add code here to check that status is not doc_owner here so that document owner does not gets listed as 
+         * invited signatory in  list of signatories provided.
+         */
         $params = array(
             'conditions' => array('did' => $id),
             'order' => array('modified' => -1)

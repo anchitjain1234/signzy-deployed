@@ -131,25 +131,11 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-8 col-md-offset-2">
+                        <div class="col-md-6">
                             <div class="camera">
-                                <video id="video">Video stream not available.</video> 
-                            </div>
-                        </div>
-                        <canvas id="canvas" style="display: none;">
-                        </canvas>
-                        
-                    </div>
-                    <div class="row">
-                        <div class="col-md-2 col-md-offset-5">
-                            <button id="startbutton" class="btn btn-default">Capture Image</button>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-8 col-md-offset-2">
-                            <div class="output">
-                                <img id="photo" alt="The screen capture will appear in this box."> 
-                            </div>
+    <video id="video">Video stream not available.</video>
+    <button id="startbutton">Take photo</button>
+  </div>
                         </div>
                     </div>
 
