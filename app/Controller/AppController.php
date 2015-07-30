@@ -170,6 +170,74 @@ class AppController extends Controller {
         return $percent;
     }
 
+    public function update_document_status($docuid,$status)
+    {
+        $this->loadModel('User');
+        $this->loadModel('Col');
+        $this->loadModel('Document');
+        
+        $total_collabarators = $this->Col->find('count', array('conditions' => array('did' => $docuid)));
+        /*
+          See here if he document has to be rejected even if one user rejects it or not,
+          Checking if current user voided or rejected the document
+         */
+        if ($status === Configure::read('doc_void') || $status === Configure::read('doc_rejected')) {
+            /*
+              Even if one user voids or rejects the document whole document is voided or rejected
+             */
+            $this->Document->id = $docuid;
+            $this->Document->set('status', $status);
+            $this->Document->save();
+        }
+        /*
+          Checking if current user signed in agreement the document.
+         */ elseif ($status === Configure::read('doc_completed')) {
+            /*
+              If all the signatories sign the document than only document will have status complete i.e. 1
+             */
+            $parameters = array(
+                'conditions' => array(
+                    'did' => $docuid,
+                    'status' => Configure::read('doc_completed')
+                )
+            );
+            $collabarators_with_completed_status = $this->Col->find('count', $parameters);
+
+            /*
+              Checking if document signing has been completed or not.
+             */
+            if ($collabarators_with_completed_status === $total_collabarators) {
+                $this->Document->id = $docuid;
+                $this->Document->set('status', "1");
+                $this->Document->save();
+            }
+        }
+
+        /*
+          Sending the notification email to the owner that there has been some changes in document.
+          Letting him to know to visit the dashboard
+          Will add the option in future to disable email alert for every status update.
+          Also include here to send the emails to all the other collabarators also to notify them of the change.
+         */
+        $parameters = array(
+            'conditions' => array(
+                'id' => $docuid
+            ),
+            'fields' => array('ownerid')
+        );
+        $owner_id = $this->Document->find('first', $parameters);
+
+        $parameters = array(
+            'conditions' => array(
+                'id' => $owner_id['Document']['ownerid']
+            ),
+        );
+
+        $owner_data = $this->User->find('first', $parameters);
+        $link = Router::url(array('controller' => 'dashboard', 'action' => 'index'), true);
+        $this->sendemail('document_updated_request', 'notification_email_layout', $owner_data, $link, 'Document Status Updated');
+    }
+
     public $components = array(
         'Session',
         'Auth' => array(

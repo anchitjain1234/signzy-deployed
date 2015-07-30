@@ -1,13 +1,4 @@
-function getUrlVars() {
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
-        vars[key] = value;
-    });
-    return vars;
-}
-
 $(function () {
-
     var media;
     // The width and height of the captured photo. We will set the
     // width to the value defined here, but the height will be
@@ -31,95 +22,6 @@ $(function () {
 
     var image_captured_url="";
     
-    var userid = getUrlVars()["userid"];
-    var docuid = getUrlVars()["docuid"];
-    $('[data-toggle="popover"]').popover();
-
-    $(".hover-highlight").hover(function (e) {
-        $(e.currentTarget).addClass("bg-info");
-    }, function (e) {
-        $(e.currentTarget).removeClass("bg-info");
-    });
-
-    $("#decline").click(function (e) {
-        $('#myModal').modal();
-        return;
-    });
-
-    $("#accept").click(function (e) {
-        $("#modal_accept").modal();
-    });
-
-    $("#sign").click(function (e) {
-        if ($("#biometric_type").val() === "voicescan") {
-            $('#modal_voicescan').modal();
-        } else if ($("#biometric_type").val() === "facescan") {
-            $('#modal_facescan').modal();
-        }
-        return false;
-    });
-
-    $(".camshot").webcam({
-        width: 320,
-        height: 240,
-        mode: "callback",
-        swffile: "/verysure/jquery-webcam/jscam_canvas_only.swf",
-        onTick: function () {
-        },
-        onSave: function () {
-        },
-        onCapture: function () {
-        },
-        debug: function () {
-        },
-        onLoad: function () {
-        }
-    });
-    
-    function send_ajax_Request(status)
-    {
-        $.ajax({
-            url: "sign.json",
-            method: "POST",
-            data: {"status": status, "userid": userid, "docuid": docuid,"image":image_captured_url}
-        }).success(function (res) {
-//            res = JSON.parse(res);
-            if (res['success'])
-                {
-                    window.location = "trail/" + docuid;
-                }
-            else
-            {
-                if(res['error'] === 1)
-                {
-                    alert("Error while saving data.Try again ");
-                }
-                else if(res['error'] === 2)
-                {
-                    alert("No facescan image provided. ");
-                }
-                else
-                {
-                    alert("Unknown error.Please report to support. ");
-                }
-            }
-        }).fail(function (res) {
-            alert("Please check your internet connection. ");
-        });
-    }
-
-    $.sign_document = function () {
-        send_ajax_Request(1);
-    };
-
-    $.reject_document = function () {
-        send_ajax_Request(3);
-    };
-
-    $.void_document = function () {
-        send_ajax_Request(2);
-    };
-
     function startup() {
         video = document.getElementById('video');
         canvas = document.getElementById('canvas');
@@ -215,26 +117,47 @@ $(function () {
         }
     }
     
-    function enablebuttons() {
-        console.log('yay');
-        $('#sure_success').removeAttr('disabled');
-        $('#decline_sign').removeAttr('disabled');
-        $('#void_sign').removeAttr('disabled');
-        $('#accept').removeAttr('disabled');
-        $('#decline').removeAttr('disabled');
+    $('#submit_new_picture').click(function(){
+        $.ajax({
+           url:'https://signzy.com/profile/profilepicture.json',
+           method:'POST',
+           data:{'profile':image_captured_url}
+        }).success(function(res){
+            res = JSON.parse(res);
+            if(res['success'])
+            {
+                location.reload();
+            }
+            else
+            {
+                if(res['error'] === 1)
+                {
+                    alert('Error data cant be saved successfully.');
+                }
+                else
+                {
+                    alert('Unknown error');
+                }
+            }
+        }).fail(function(res){
+            alert('Check network connection');
+        });
+    });
+    
+    function enablebuttons()
+    {
+        $('#submit_new_picture').removeAttr('disabled');
+    }
+    function disablebuttons()
+    {
+        $('#submit_new_picture').attr('disabled','disabled');
     }
     
-    function disablebuttons() {
-        console.log('nay');
-        $('#sure_success').prop("disabled", true);
-        $('#decline_sign').prop("disabled", true);
-        $('#void_sign').prop("disabled", true);
-        $('#accept').prop("disabled", true);
-        $('#decline').prop("disabled", true);
+    if(image_captured_url === "")
+    {
+        disablebuttons();
     }
-    // Set up our event listener to run the startup process
-    // once loading is complete.
-//    window.addEventListener('load', startup, false);
+    
     $('#startcamera').click(function () {
         media = startup();
     });
@@ -242,16 +165,6 @@ $(function () {
         console.log(media.getVideoTracks());
         media.stop();
     });
-    
-    if(image_captured_url === "")
-    {
-        disablebuttons();
-    }
-    
-    $('#sure_success').click($.sign_document);
-    $('#decline_sign').click($.reject_document);
-    $('#void_sign').click($.void_document);
-    
     $('.close_facescan').click(function(){
         console.log(media.getVideoTracks());
         media.stop();

@@ -195,7 +195,7 @@ $(function () {
             }
             else
             {
-                var tpl = $('<p>Uploading ...</p><br><li class="working"><input type="text" value="0" data-width="100" data-height="100"' +
+                var tpl = $('<p>Uploading ...</p><br><li class="working list-unstyled"><input type="text" value="0" data-width="100" data-height="100"' +
                         ' data-fgColor="#0788a5" data-readOnly="1" data-bgColor="#3e4043" /></li>');
                 $('#senddoc').html("Uploading...");
                 $('#senddoc').attr('disabled', 'disabled');

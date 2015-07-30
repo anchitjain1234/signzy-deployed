@@ -19,7 +19,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group" id="company_name_div" style="display:none;">
+                    <div class="form-group" id="company_name_div" style="">
                         <div class="form-group has-feedback">
                             <?php
                             echo $this->Form->label('companyname', 'Name of Company:', array('class' => 'control-label'));
