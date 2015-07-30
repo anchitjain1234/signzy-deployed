@@ -119,7 +119,7 @@ $(function () {
     
     $('#submit_new_picture').click(function(){
         $.ajax({
-           url:'http://localhost/cakephp/profile/profilepicture.json',
+           url:'https://signzy.com/profile/profilepicture.json',
            method:'POST',
            data:{'profile':image_captured_url}
         }).success(function(res){
