@@ -30,7 +30,7 @@ $(function () {
     var startbutton = null;
 
     var image_captured_url="";
-
+    
     var userid = getUrlVars()["userid"];
     var docuid = getUrlVars()["docuid"];
     $('[data-toggle="popover"]').popover();
@@ -59,7 +59,25 @@ $(function () {
         return false;
     });
 
-    $.sign_document = function () {
+    $(".camshot").webcam({
+        width: 320,
+        height: 240,
+        mode: "callback",
+        swffile: "/verysure/jquery-webcam/jscam_canvas_only.swf",
+        onTick: function () {
+        },
+        onSave: function () {
+        },
+        onCapture: function () {
+        },
+        debug: function () {
+        },
+        onLoad: function () {
+        }
+    });
+    
+    function send_ajax_Request(status)
+    {
         $.ajax({
             url: "sign.json",
             method: "POST",
@@ -196,7 +214,7 @@ $(function () {
             clearphoto();
         }
     }
-
+    
     function enablebuttons() {
         console.log('yay');
         $('#sure_success').removeAttr('disabled');
@@ -205,7 +223,7 @@ $(function () {
         $('#accept').removeAttr('disabled');
         $('#decline').removeAttr('disabled');
     }
-
+    
     function disablebuttons() {
         console.log('nay');
         $('#sure_success').prop("disabled", true);
@@ -224,16 +242,16 @@ $(function () {
         console.log(media.getVideoTracks());
         media.stop();
     });
-
+    
     if(image_captured_url === "")
     {
         disablebuttons();
     }
-
+    
     $('#sure_success').click($.sign_document);
     $('#decline_sign').click($.reject_document);
     $('#void_sign').click($.void_document);
-
+    
     $('.close_facescan').click(function(){
         console.log(media.getVideoTracks());
         media.stop();
