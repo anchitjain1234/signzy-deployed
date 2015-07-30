@@ -8,3 +8,6 @@
 [submodule "app/Plugin/upload_pack"]
 	path = app/Plugin/upload_pack
 	url = git://github.com/szajbus/uploadpack.git
+[submodule "app/vendor/PDFMerger"]
+	path = app/vendor/PDFMerger
+	url = https://github.com/myokyawhtun/PDFMerger
