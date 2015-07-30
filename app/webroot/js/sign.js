@@ -36,23 +36,6 @@ $(function () {
         return false;
     });
 
-    $(".camshot").webcam({
-        width: 320,
-        height: 240,
-        mode: "callback",
-        swffile: "/verysure/jquery-webcam/jscam_canvas_only.swf",
-        onTick: function () {
-        },
-        onSave: function () {
-        },
-        onCapture: function () {
-        },
-        debug: function () {
-        },
-        onLoad: function () {
-        }
-    });
-
     $.sign_document = function () {
         $.ajax({
             url: "sign",
