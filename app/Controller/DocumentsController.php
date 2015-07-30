@@ -1,7 +1,7 @@
 <?php
 
 require('../vendor/PDFMerger/PDFMerger.php');
-
+require('../vendor/PDFMerger/fpdf/fpdf.php');
 class PDF extends FPDF {
 
     function Header() {
