@@ -51,6 +51,18 @@
 
         <div id="navbar" class="navbar-collapse collapse navbar-right">
           <ul class="nav navbar-nav">
+              <?php if(isset($userdata['User']['type']) && ($userdata['User']['type'] != Configure::read('customer')))
+              {
+                  ?>
+              <li><?php echo $this->Html->link("Support",array('controller'=>'profile','action'=>'support'))?></li>
+              <?php
+              }?>
+              <?php if(isset($userdata['User']['type']) && ($userdata['User']['type'] == Configure::read('admin')))
+              {
+                  ?>
+              <li><?php echo $this->Html->link("Admin",array('controller'=>'profile','action'=>'admin'))?></li>
+              <?php
+              }?>
             <li><?php echo $this->Html->link("Hi, $name",array('controller'=>'profile','action'=>'index'))?></li>
             <!-- <li role="presentation"><a href="#">Notifications <span class="badge">3</span></a></li> -->
             <li><?php echo $this->Html->link('Logout',array('controller'=>'users','action'=>'signout'))?></li>
