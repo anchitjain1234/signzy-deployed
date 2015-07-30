@@ -124,7 +124,10 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="camshot"></div>
+                            <div class="camera">
+    <video id="video">Video stream not available.</video>
+    <button id="startbutton">Take photo</button> 
+  </div>
                         </div>
                     </div>
 
