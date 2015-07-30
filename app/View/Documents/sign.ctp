@@ -21,9 +21,11 @@
     ?>
     <div class="row">
         <div class="col-md-12">
-            <h3>Please Review and act on the document<?php if (isset($company_info)) {
-        echo " on behalf of <b><u>" . $company_info['Company']['name'] . "</u></b>";
-    } ?></h3>
+            <h3>Please Review and act on the document<?php
+                if (isset($company_info)) {
+                    echo " on behalf of <b><u>" . $company_info['Company']['name'] . "</u></b>";
+                }
+                ?></h3>
         </div>
     </div>
 
@@ -74,7 +76,7 @@
                         <option value="facescan">Facescan</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" type="submit" id="sign">Sign</button>
+                <button class="btn btn-primary" type="submit" id="sign">Scan</button>
             </form>
         </div>
     </div>
@@ -108,29 +110,52 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal_facescan" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="modal_facescan" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close close_facescan" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="myModalLabel">Facescan</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-offset-4">
+                            <button id="startcamera" class="btn btn-success">Start camera</button>
+                            <button id="stopcamera" class="btn btn-danger">Stop camera</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-2">
                             <h5>Place your face in front of the camera</h5>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="camshot"></div>
+                        <div class="col-md-8 col-md-offset-2">
+                            <div class="camera">
+                                <video id="video">Video stream not available.</video> 
+                            </div>
+                        </div>
+                        <canvas id="canvas" style="display: none;">
+                        </canvas>
+                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-md-offset-5">
+                            <button id="startbutton" class="btn btn-default">Capture Image</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-2">
+                            <div class="output">
+                                <img id="photo" alt="The screen capture will appear in this box."> 
+                            </div>
                         </div>
                     </div>
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default close_facescan" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary">Capture</button>
                 </div>
             </div>
@@ -150,13 +175,6 @@
                             <h5>Place your face in front of the camera</h5>
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="camshot"></div>
-                        </div>
-                    </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -166,7 +184,6 @@
         </div>
     </div>
 
-    </div>
 
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">

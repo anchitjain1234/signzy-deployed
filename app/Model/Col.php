@@ -34,6 +34,16 @@ class Col extends AppModel {
         'modified' => array(
             'type' => 'timestamp',
             'null' => 'false'
+        ),
+        'photoverification' => array(
+            'type' => 'string',
+            'null' => 'false',
+            'default' => '-1'
+        ),
+        'photocaptured' => array(
+            'type' => 'string',
+            'null' => 'true',
+            'default' => null
         )
     );
 

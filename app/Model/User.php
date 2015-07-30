@@ -87,6 +87,11 @@ class User extends AppModel {
         'modified' => array(
             'type' => 'timestamp',
             'null' => 'false'
+        ),
+        'type' => array(
+            'type' => 'string',
+            'null' => 'false',
+            'default' => '0'
         )
     );
 
