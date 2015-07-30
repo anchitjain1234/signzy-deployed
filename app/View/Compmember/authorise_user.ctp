@@ -63,6 +63,10 @@
 
 <?php
 echo $this->Html->script('jquery-1.11.1.min.js');
+echo $this->Html->script('jquery-ui.min.js');
 echo $this->Html->script('bootstrap.min.js');
+echo $this->Html->script('jquery.knob.js');
+echo $this->Html->script('jquery.iframe-transport.js');
+echo $this->Html->script('jquery.fileupload.js');
 echo $this->Html->script('authorise_user.js');
 ?>
