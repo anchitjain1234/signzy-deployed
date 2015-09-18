@@ -13,7 +13,7 @@ app/webroot/files
 /dist
 /tags
 *.mo
-
+app/Config/email.php
 # IDE and editor specific files #
 #################################
 /nbproject
