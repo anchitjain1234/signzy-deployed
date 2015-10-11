@@ -15,6 +15,7 @@ app/webroot/files
 *.mo
 robots.txt
 /app/Config/email.php
+.directory
 
 
 # IDE and editor specific files #
