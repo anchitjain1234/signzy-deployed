@@ -14,6 +14,7 @@ app/webroot/files
 /tags
 *.mo
 robots.txt
+/app/Config/email.php
 
 
 # IDE and editor specific files #
